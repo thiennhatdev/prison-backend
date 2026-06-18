@@ -9,7 +9,7 @@ return [
         'module' => true,
     ],
     'customers' => [
-        'title' => 'Customers',
+        'title' => 'User',
         'route' => 'admin.customers.index',
     ],
     'post' => [

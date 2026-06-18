@@ -41,4 +41,5 @@ class SurveyRepository extends ModuleRepository
             ->latest()
             ->paginate($limit);
     }
+
 }

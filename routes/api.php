@@ -13,7 +13,6 @@ Route::get('/prisoners', [PrisonerController::class, 'index']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 Route::post('/auth/register', [AuthController::class, 'register']);
 
-
 Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
     Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
     Route::get('/user/me', [AuthController::class, 'info']);
@@ -25,7 +24,7 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
     Route::get('/prison-rule/{id}', [PrisonRuleController::class, 'detail']);
     Route::get('/surveys', [SurveyController::class, 'list']);
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
-
+    Route::post('/survey', [SurveyController::class, 'create']);
 });
 
 Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
