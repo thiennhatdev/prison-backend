@@ -58,6 +58,7 @@ class VisitationScheduleController extends BaseModuleController
                                 Option::make('WIFE', 'Vợ'),
                                 Option::make('HUSBAND', 'Chồng'),
                                 Option::make('CHILD', 'Con'),
+                                Option::make('NURTURER', 'Người nuôi dưỡng'),
                             ])
                         )
                     

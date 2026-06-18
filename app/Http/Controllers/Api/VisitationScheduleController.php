@@ -99,7 +99,7 @@ class VisitationScheduleController extends Controller
                 'title' => $request->prisoner_name,
                 'prisoner_name' => $request->prisoner_name,
                 'relatives' => $request->relatives,
-                'customer_id' => $request->customer_id,
+                'customer_id' => $request->user()->id,
             ]);
 
             $token = Str::uuid()->toString();

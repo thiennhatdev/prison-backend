@@ -1,9 +1,5 @@
 <?php 
 return [
-    'user' => [
-        'title' => 'Danh sách user',
-        'module' => true,
-    ],
     'prisoner' => [
         'title' => 'Phạm nhân',
         'module' => true,
@@ -15,5 +11,17 @@ return [
     'customers' => [
         'title' => 'Customers',
         'route' => 'admin.customers.index',
+    ],
+    'post' => [
+        'title' => 'Tin tức',
+        'module' => true,
+    ],
+    'prisonRule' => [
+        'title' => 'Nội quy',
+        'module' => true,
+    ],
+    'survey' => [
+        'title' => 'Đánh giá',
+        'module' => true,
     ],
 ];

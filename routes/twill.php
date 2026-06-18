@@ -11,3 +11,6 @@ TwillRoutes::module('relatives');
 TwillRoutes::module('visitationSchedules');
 // Route::name('customers.index')
 //     ->get('/customers', [CustomerController::class, 'index']);
+TwillRoutes::module('prisonRules');
+TwillRoutes::module('posts');
+TwillRoutes::module('surveys');
