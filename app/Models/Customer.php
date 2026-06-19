@@ -24,6 +24,11 @@ class Customer extends Authenticatable
         'last_login_at' => 'datetime',
     ];
 
+    const ROLES = [
+        'CUSTOMER' => 'Thân nhân',
+        'GATE' => 'Cán bộ cổng',
+    ];
+
      public function visitationSchedules()
     {
         return $this->hasMany(

@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\PrisonRuleController;
 use App\Http\Controllers\Api\SurveyController;
+use App\Http\Controllers\Admin\CustomerController;
 
 Route::get('/prisoners', [PrisonerController::class, 'index']);
 
@@ -30,3 +31,8 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
 Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
     Route::get('/visitation-schedule/verify/{token}', [VisitationScheduleController::class, 'verify']);
 });
+
+Route::post(
+    '/customers/{customer}/role',
+    [CustomerController::class, 'changeRole']
+)->name('admin.customers.role');

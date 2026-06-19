@@ -8,16 +8,26 @@ use App\Models\Customer;
 
 class CustomerController extends Controller
 {
-     public function index()
+     public function index(Request $request)
     {
-        $customers = Customer::query()
-            ->latest()
-            ->paginate(20);
+         $customers = Customer::query()
+        ->when($request->filled('search'), function ($query) use ($request) {
+            $search = $request->search;
 
-        return view(
-            'admin.customers.index',
-            compact('customers')
-        );
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('id', $search);
+            });
+        })
+        ->latest()
+        ->paginate(20)
+        ->withQueryString();
+
+    return view(
+        'admin.customers.index',
+        compact('customers')
+    );
     }
 
     public function show(Customer $customer)
@@ -32,6 +42,19 @@ class CustomerController extends Controller
     {
         $customer->update([
             'is_active' => !$customer->is_active
+        ]);
+
+        return back();
+    }
+
+    public function changeRole(Request $request, Customer $customer)
+    {
+        $request->validate([
+            'role' => 'required'
+        ]);
+
+        $customer->update([
+            'role' => $request->role
         ]);
 
         return back();

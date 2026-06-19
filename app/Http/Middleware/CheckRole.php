@@ -23,6 +23,12 @@ class CheckRole
             ], 401);
         }
 
+        if (!$user->is_active) {
+            return response()->json([
+                'message' => 'Tài khoản đã bị khóa'
+            ], 403);
+        }
+
         if (!in_array($user->role, $roles)) {
             return response()->json([
                 'message' => 'Forbidden'

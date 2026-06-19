@@ -21,10 +21,5 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //  TwillNavigation::addLink(
-        //     NavigationLink::make()
-        //         ->title('Customers')
-        //         ->forRoute('admin.customers.index')
-        // );
     }
 }
