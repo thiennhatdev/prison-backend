@@ -49,5 +49,13 @@ class VisitationSchedule extends Model implements Sortable
         {
             return $this->belongsTo(Customer::class);
         }
+
+    public function getStatusLabelAttribute()
+    {
+        return [
+            'NOT_YET' => 'Sắp tới',
+            'DONE' => 'Đã thăm',
+        ][$this->status] ?? '';
+    }
     
 }

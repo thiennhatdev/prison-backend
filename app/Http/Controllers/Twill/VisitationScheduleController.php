@@ -43,7 +43,7 @@ class VisitationScheduleController extends BaseModuleController
         }
 
         $form->add(
-            InlineRepeater::make()->name('relatives') 
+            InlineRepeater::make()->name('relatives')->label("thân nhân")
                 ->fields([
                     Input::make()->name('username')->label('Họ tên'),
                     Input::make()->name('phone')->label('Số điện thoại'),
@@ -70,6 +70,7 @@ class VisitationScheduleController extends BaseModuleController
             ->name('visitDate')
             ->withoutTime()
             ->altFormat('d/m/Y')
+            ->label('Ngày')
         );
 
         $form->add(
@@ -78,6 +79,7 @@ class VisitationScheduleController extends BaseModuleController
                 ->timeOnly()
                 ->time24Hr()
                 ->altFormat('H:i')
+                ->label('Khung giờ')
 
         );
 
@@ -85,6 +87,7 @@ class VisitationScheduleController extends BaseModuleController
             Input::make()
             ->type('number')
             ->name('count')
+            ->label('Số người thăm')
         );
 
         $form->add(
@@ -99,7 +102,7 @@ class VisitationScheduleController extends BaseModuleController
         $form->add(
         Select::make()
             ->name('customer_id')
-            ->label('Customer')
+            ->label('Thân nhân')
             ->options(
                 Customer::query()
                     ->orderBy('name')
@@ -133,7 +136,17 @@ class VisitationScheduleController extends BaseModuleController
         $table = parent::additionalIndexTableColumns();
 
         $table->add(
-            Text::make()->field('description')->title('Description')
+            Text::make()
+            ->field('status_label')
+            ->title('Trạng thái')
+        );
+
+        $table->add(
+            Text::make()->field('visitDate')->title('Ngày thăm')
+        );
+
+        $table->add(
+            Text::make()->field('visitTime')->title('Giờ thăm')
         );
 
         return $table;

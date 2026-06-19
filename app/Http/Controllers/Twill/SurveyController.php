@@ -36,7 +36,7 @@ class SurveyController extends BaseModuleController
         );
 
         $form->add(
-            Input::make()->name('description')->label('Mô tả ngắn')
+            Input::make()->name('description')->label('Nội dung')
         );
 
         return $form;
@@ -50,7 +50,7 @@ class SurveyController extends BaseModuleController
         $table = parent::additionalIndexTableColumns();
 
         $table->add(
-            Text::make()->field('description')->title('Description')
+            Text::make()->field('description')->title('Nội dung')
         );
 
         return $table;

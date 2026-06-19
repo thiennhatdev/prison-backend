@@ -40,6 +40,7 @@ class PrisonRuleController extends BaseModuleController
         $form->add(
                 BlockEditor::make()
                 ->name('blocks')
+                ->label('Nội dung')
                 ->blocks([
 
                      \App\View\Components\Twill\Blocks\Info::class, 
@@ -59,7 +60,7 @@ class PrisonRuleController extends BaseModuleController
         $table = parent::additionalIndexTableColumns();
 
         $table->add(
-            Text::make()->field('description')->title('Description')
+            Text::make()->field('description')->title('Mô tả ngắn')
         );
 
         return $table;

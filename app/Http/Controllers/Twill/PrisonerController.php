@@ -32,11 +32,11 @@ class PrisonerController extends BaseModuleController
         $form = parent::getForm($model);
 
         $form->add(
-            Input::make()->name('code')
+            Input::make()->name('code')->label('Mã phạm nhân')->disabled()
         );
 
         $form->add(
-            Input::make()->name('username')
+            Input::make()->name('username')->label('Họ tên')
         );
 
         $form->add(
@@ -62,7 +62,11 @@ class PrisonerController extends BaseModuleController
         $table = parent::additionalIndexTableColumns();
 
         $table->add(
-            Text::make()->field('description')->title('Description')
+            Text::make()->field('code')->title('Mã phạm nhân')
+        );
+
+        $table->add(
+            Text::make()->field('username')->title('Họ tên')
         );
 
         return $table;
