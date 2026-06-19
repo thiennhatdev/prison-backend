@@ -17,6 +17,8 @@ class VisitationScheduleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'prisoner_name' => 'required',
+            'prisoner_birthday' => 'required',
+            'prisoner_address' => 'required',
             'visitDate' => 'required|date',
             'visitTime' => ['required', 'date_format:H:i'],
             'count' => 'required|integer|min:1|max:3',
@@ -98,6 +100,8 @@ class VisitationScheduleController extends Controller
                 'count' => $request->count,
                 'title' => $request->prisoner_name,
                 'prisoner_name' => $request->prisoner_name,
+                'prisoner_birthday' => $request->prisoner_birthday,
+                'prisoner_address' => $request->prisoner_address,
                 'relatives' => $request->relatives,
                 'customer_id' => $request->user()->id,
             ]);

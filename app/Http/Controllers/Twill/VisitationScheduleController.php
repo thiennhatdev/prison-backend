@@ -35,6 +35,21 @@ class VisitationScheduleController extends BaseModuleController
     {
         $form = parent::getForm($model);
 
+        $form->add(
+            Input::make()
+            ->name('prisoner_name')
+            ->label('Tên phạm nhân')
+        );
+        $form->add(
+            Input::make()
+            ->name('prisoner_address')
+            ->label('Địa chỉ phạm nhân')
+        );
+        $form->add(
+            Input::make()
+            ->name('prisoner_birthday')
+            ->label('Năm sinh phạm nhân')
+        );
         $prisoners = app()->make(PrisonerRepository::class)->listAll();
  
         $arrPrisoner= [];
@@ -122,6 +137,17 @@ class VisitationScheduleController extends BaseModuleController
                 ->options([
                     ['value' => 'DONE', 'label' => 'Đã thăm'],
                     ['value' => 'NOT_YET', 'label' => 'Sắp tới'],
+                ])
+        ) ;
+
+        $form->add(
+            Select::make()
+                ->name('refuse')
+                ->label('Lý do từ chối')
+                ->options([
+                    ['value' => '0', 'label' => 'Sai thông tin phạm nhân'],
+                    ['value' => '1', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
+                    ['value' => '2', 'label' => 'Lý do khác'],
                 ])
         ) ;
 

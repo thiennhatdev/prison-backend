@@ -13,6 +13,9 @@ return new class extends Migration
             // this will create an id, a "published" column, and soft delete and timestamps columns
             createDefaultTableFields($table);
             
+            $table->string('prisoner_name', 200)->nullable();
+            $table->string('prisoner_birthday', 200)->nullable();
+            $table->string('prisoner_address', 200)->nullable();
             $table->integer('position')->unsigned()->nullable();
             $table->json('relatives')->nullable();
             $table->foreignIdFor(Prisoner::class)->nullable();
@@ -20,6 +23,7 @@ return new class extends Migration
             $table->time('visitTime')->nullable();
             $table->string('qr_token', 200)->nullable();
             $table->string('status', 200)->default('NOT_YET');
+            $table->string('refuse', 200)->nullable();
             $table->integer('count')->unsigned()->default(1);
             $table->foreignId('customer_id')
                 ->nullable()

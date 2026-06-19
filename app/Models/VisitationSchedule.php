@@ -29,7 +29,11 @@ class VisitationSchedule extends Model implements Sortable
         'count',
         'qr_token',
         'customer_id',
-        'status'
+        'status',
+        'prisoner_name',
+        'prisoner_birthday',
+        'prisoner_address',
+        'refuse',
     ];
     
     public $translatedAttributes = [

@@ -32,7 +32,12 @@ Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
     Route::get('/visitation-schedule/verify/{token}', [VisitationScheduleController::class, 'verify']);
 });
 
-Route::post(
-    '/customers/{customer}/role',
-    [CustomerController::class, 'changeRole']
-)->name('admin.customers.role');
+Route::middleware(['web', 'twill_auth'])
+    ->group(function () {
+
+        Route::post(
+            '/customers/{customer}/role',
+            [CustomerController::class, 'changeRole']
+        )->name('admin.customers.role');
+
+    });
