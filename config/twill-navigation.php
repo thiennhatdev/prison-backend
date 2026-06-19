@@ -1,5 +1,9 @@
 <?php 
 return [
+    'thongke' => [
+        'title' => 'Thống kê',
+        'route' => 'admin.thongke.index',
+    ],
     'prisoner' => [
         'title' => 'Phạm nhân',
         'module' => true,

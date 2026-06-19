@@ -147,7 +147,8 @@ class VisitationScheduleController extends BaseModuleController
                 ->options([
                     ['value' => '0', 'label' => 'Sai thông tin phạm nhân'],
                     ['value' => '1', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
-                    ['value' => '2', 'label' => 'Lý do khác'],
+                    ['value' => '2', 'label' => 'Trùng thời gian thăm gặp'],
+                    ['value' => '3', 'label' => 'Lý do khác'],
                 ])
         ) ;
 

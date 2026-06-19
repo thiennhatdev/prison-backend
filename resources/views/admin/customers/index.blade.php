@@ -107,7 +107,7 @@
 
 @section('content')
 
-<div class="wrapper" style="margin:20px;">
+<div class="wrapper container" style="padding-top:20px ;">
     <div style=" width: 100%">
 
         <div class="card">

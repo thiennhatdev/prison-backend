@@ -10,6 +10,7 @@ class CustomerController extends Controller
 {
      public function index(Request $request)
     {
+
          $customers = Customer::query()
         ->when($request->filled('search'), function ($query) use ($request) {
             $search = $request->search;
