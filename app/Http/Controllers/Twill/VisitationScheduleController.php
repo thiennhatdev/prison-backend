@@ -14,6 +14,9 @@ use A17\Twill\Services\Forms\Options;
 use A17\Twill\Services\Forms\Option;
 use App\Repositories\PrisonerRepository;
 use App\Models\Customer;
+use A17\Twill\Services\Listings\Filters\TableFilters;
+use A17\Twill\Services\Listings\Filters\BasicFilter;
+use Illuminate\Support\Collection;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -178,4 +181,49 @@ class VisitationScheduleController extends BaseModuleController
 
         return $table;
     }
+
+
+
+public function filters(): TableFilters
+{
+    return TableFilters::make([
+        BasicFilter::make()
+            ->label('Ngày thăm')
+            ->queryString('date_filter')
+            ->options(collect([
+                'tomorrow' => 'Ngày mai',
+                'today' => 'Hôm nay',
+                'yesterday' => 'Hôm qua',
+                'this_week' => 'Tuần này',
+                'this_month' => 'Tháng này',
+            ]))
+            ->apply(function ($query, $value) {
+                switch ($value) {
+                    case 'tomorrow':
+                        $query->whereDate('visitDate', now()->addDay());
+                        break;
+
+                    case 'today':
+                        $query->whereDate('visitDate', now());
+                        break;
+
+                    case 'yesterday':
+                        $query->whereDate('visitDate', now()->subDay());
+                        break;
+
+                    case 'this_week':
+                        $query->whereBetween('visitDate', [
+                            now()->startOfWeek(\Carbon\Carbon::MONDAY),
+                            now()->endOfWeek(\Carbon\Carbon::MONDAY),
+                        ]);
+                        break;
+
+                    case 'this_month':
+                        $query->whereYear('visitDate', now()->year)
+                              ->whereMonth('visitDate', now()->month);
+                        break;
+                }
+            }),
+    ]);
+}
 }
