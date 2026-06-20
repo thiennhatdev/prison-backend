@@ -152,8 +152,7 @@ class VisitationScheduleController extends Controller
 
      public function list(Request $request)
     {
-        $schedules = VisitationSchedule::published()
-            ->where('customer_id', $request->user()->id)
+        $schedules = VisitationSchedule::where('customer_id', $request->user()->id)
             ->latest()
             ->get();
 
