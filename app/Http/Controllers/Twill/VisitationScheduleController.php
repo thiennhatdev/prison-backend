@@ -152,7 +152,7 @@ class VisitationScheduleController extends BaseModuleController
                     ['value' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
                     ['value' => 'Trùng thời gian thăm gặp', 'label' => 'Trùng thời gian thăm gặp'],
                     ['value' => 'Lý do khác', 'label' => 'Lý do khác'],
-                    ['value' => '', 'label' => 'Trống'],
+                    ['value' => '', 'label' => 'TRỐNG'],
                 ])
                 ->note("* Lưu ý: Trường này để trống thì lịch thăm mới không bị từ chối")
         ) ;
