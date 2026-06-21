@@ -76,6 +76,7 @@ class AuthController extends Controller
             ['zalo_id' => $profile['id']],
             [
                 'name' => $profile['name'] ?? null,
+                'role' => "CUSTOMER"
             ]
         );
 

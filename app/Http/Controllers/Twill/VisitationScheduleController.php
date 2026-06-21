@@ -148,11 +148,13 @@ class VisitationScheduleController extends BaseModuleController
                 ->name('refuse')
                 ->label('Lý do từ chối')
                 ->options([
-                    ['value' => '0', 'label' => 'Sai thông tin phạm nhân'],
-                    ['value' => '1', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
-                    ['value' => '2', 'label' => 'Trùng thời gian thăm gặp'],
-                    ['value' => '3', 'label' => 'Lý do khác'],
+                    ['value' => 'Sai thông tin phạm nhân', 'label' => 'Sai thông tin phạm nhân'],
+                    ['value' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
+                    ['value' => 'Trùng thời gian thăm gặp', 'label' => 'Trùng thời gian thăm gặp'],
+                    ['value' => 'Lý do khác', 'label' => 'Lý do khác'],
+                    ['value' => '', 'label' => 'Trống'],
                 ])
+                ->note("* Lưu ý: Trường này để trống thì lịch thăm mới không bị từ chối")
         ) ;
 
         return $form;
@@ -169,6 +171,14 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
             ->field('status_label')
             ->title('Trạng thái')
+        );
+
+        $table->add(
+            Text::make()->field('refuse')->title('Lý do từ chối')
+        );
+
+        $table->add(
+            Text::make()->field('visitTime')->title('Giờ thăm')
         );
 
         $table->add(
