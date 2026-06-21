@@ -6,6 +6,68 @@
 
 @push('extra_css')
 <style>
+.dashboard-filter {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    display: flex;
+    gap: 16px;
+    align-items: end;
+    justify-content: end;
+    margin-bottom: 10px;
+}
+
+.dashboard-filter .form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.dashboard-filter label {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.dashboard-filter input[type="date"] {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 10px;
+    outline: none;
+}
+
+.dashboard-filter input[type="date"]:focus {
+    border-color: #3b82f6;
+}
+
+.btn-filter {
+    height: 42px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 10px;
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-filter:hover {
+    opacity: .9;
+}
+
+.btn-reset {
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 10px;
+    text-decoration: none;
+    background: #e5e7eb;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+}
+
+
 .dashboard-grid{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -42,6 +104,35 @@
 </style>
 
 @endpush
+
+<form method="GET" class="dashboard-filter container">
+    <div>
+        <label>Từ ngày</label>
+        <input
+            type="date"
+            name="from_date"
+            value="{{ $fromDate }}"
+        >
+    </div>
+
+    <div>
+        <label>Đến ngày</label>
+        <input
+            type="date"
+            name="to_date"
+            value="{{ $toDate }}"
+        >
+    </div>
+
+    <button type="submit" class="btn-filter">
+        Lọc
+    </button>
+
+    <a href="{{ route('admin.thongke.index') }}" class="btn-reset">
+        Xóa lọc
+    </a>
+</form>
+
 <div class="dashboard-grid container">
 
     <div class="dashboard-card">

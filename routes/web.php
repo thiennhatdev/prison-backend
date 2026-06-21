@@ -40,7 +40,7 @@ Route::middleware(['web', 'auth:twill_users'])
             '/thongke',
             [DashboardController::class, 'index']
         )->name('admin.thongke.index');
-        
+
         Route::post(
             '/customers/{customer}/role',
             [CustomerController::class, 'changeRole']
