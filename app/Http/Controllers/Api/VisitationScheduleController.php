@@ -165,7 +165,7 @@ class VisitationScheduleController extends Controller
             ->where('customer_id', $request->user()->id)
             ->whereDate('visitDate', '>=', Carbon::today())
             ->orderBy('visitDate', 'asc')
-            ->first();
+            ->get();
 
         if (!$schedule) {
             return response()->json([
