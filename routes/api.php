@@ -12,7 +12,7 @@ Route::get('/prisoners', [PrisonerController::class, 'index']);
 
 
 Route::post('/auth/login', [AuthController::class, 'login']);
-Route::post('/auth/register', [AuthController::class, 'register']);
+// Route::post('/auth/register', [AuthController::class, 'register']);
 
 Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
     Route::post('/survey', [SurveyController::class, 'create']);
@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
 
 Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
     Route::get('/visitation-schedule/verify/{token}', [VisitationScheduleController::class, 'verify']);
+    Route::put('/allow-visit/{id}', [VisitationScheduleController::class, 'updateStatus']);
 });
 
 Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {

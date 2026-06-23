@@ -181,4 +181,23 @@ class VisitationScheduleController extends Controller
             'data' => $schedule,
         ]);
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string',
+        ]);
+
+        $schedule = VisitationSchedule::findOrFail($id);
+
+        $schedule->update([
+            'status' => $request->status,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Cập nhật trạng thái thành công',
+            'data' => $schedule,
+        ]);
+    }
 }
