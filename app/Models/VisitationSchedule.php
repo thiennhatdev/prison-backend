@@ -12,6 +12,7 @@ use A17\Twill\Models\Behaviors\HasPosition;
 use A17\Twill\Models\Behaviors\Sortable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use A17\Twill\Models\Model;
+use Carbon\Carbon;
 
 class VisitationSchedule extends Model implements Sortable
 {
@@ -60,6 +61,14 @@ class VisitationSchedule extends Model implements Sortable
             'NOT_YET' => 'Sắp tới',
             'DONE' => 'Đã thăm',
         ][$this->status] ?? '';
+    }
+
+    public function getVisitTimeLabelAttribute(): string
+    {
+        $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
+        
+        return $start->format('H:i') . ' - ' .
+            $start->copy()->addHour()->format('H:i');
     }
     
 }

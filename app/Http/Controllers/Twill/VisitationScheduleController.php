@@ -18,6 +18,7 @@ use A17\Twill\Services\Listings\Filters\TableFilters;
 use A17\Twill\Services\Listings\Filters\BasicFilter;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
+use A17\Twill\Services\Listings\Columns\PublishStatus;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -169,76 +170,109 @@ class VisitationScheduleController extends BaseModuleController
             $start->copy()->addMinutes(60)->format('H:i');
     }
 
-    /**
-     * This is an example and can be removed if no modifications are needed to the table.
-     */
-    protected function additionalIndexTableColumns(): TableColumns
-    {
-        $table = parent::additionalIndexTableColumns();
+   protected function getIndexData(array $prependScope = []): array
+{
+    $data = parent::getIndexData($prependScope);
 
-        $table->add(
-            Text::make()
-            ->field('status_label')
-            ->title('Trạng thái')
-        );
-
-        $table->add(
-            Text::make()->field('refuse')->title('Lý do từ chối')
-        );
-
-        $table->add(
-            Text::make()->field('visitDate')->title('Ngày thăm')
-        );
-
-        $table->add(
-            Text::make()->field('visitTime')->title('Giờ thăm')
-        );
-
-        return $table;
+    foreach ($data['tableData'] as $index => &$item) {
+        $item['stt'] = $index + 1;
     }
 
+    return $data;
+}
 
+protected function getIndexTableColumns(): TableColumns
+{
+    $columns = TableColumns::make();
+
+    $columns->add(
+        PublishStatus::make()
+            ->title('Published')
+            ->sortable()
+            ->optional()
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('stt')
+            ->title('STT')
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('title')
+            ->title('Tiêu đề')
+            ->sortable()
+            ->linkToEdit()
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('status_label')
+            ->title('Trạng thái')
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('refuse')
+            ->title('Lý do từ chối')
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('visitDate')
+            ->title('Ngày thăm')
+    );
+
+    $columns->add(
+        Text::make()
+            ->field('visit_time_label')
+            ->title('Giờ thăm')
+    );
+
+    return $columns;
+}
 
 public function filters(): TableFilters
-{
-    return TableFilters::make([
-        BasicFilter::make()
-            ->label('Ngày thăm')
-            ->queryString('date_filter')
-            ->options(collect([
-                'tomorrow' => 'Ngày mai',
-                'today' => 'Hôm nay',
-                'yesterday' => 'Hôm qua',
-                'this_week' => 'Tuần này',
-                'this_month' => 'Tháng này',
-            ]))
-            ->apply(function ($query, $value) {
-                switch ($value) {
-                    case 'tomorrow':
-                        $query->whereDate('visitDate', now()->addDay());
-                        break;
+    {
+        return TableFilters::make([
+            BasicFilter::make()
+                ->label('Ngày thăm')
+                ->queryString('date_filter')
+                ->options(collect([
+                    'tomorrow' => 'Ngày mai',
+                    'today' => 'Hôm nay',
+                    'yesterday' => 'Hôm qua',
+                    'this_week' => 'Tuần này',
+                    'this_month' => 'Tháng này',
+                ]))
+                ->apply(function ($query, $value) {
+                    switch ($value) {
+                        case 'tomorrow':
+                            $query->whereDate('visitDate', now()->addDay());
+                            break;
 
-                    case 'today':
-                        $query->whereDate('visitDate', now());
-                        break;
+                        case 'today':
+                            $query->whereDate('visitDate', now());
+                            break;
 
-                    case 'yesterday':
-                        $query->whereDate('visitDate', now()->subDay());
-                        break;
+                        case 'yesterday':
+                            $query->whereDate('visitDate', now()->subDay());
+                            break;
 
-                    case 'this_week':
-                        $query->whereBetween('visitDate', [
-                            now()->startOfWeek(\Carbon\Carbon::MONDAY),
-                            now()->endOfWeek(\Carbon\Carbon::MONDAY),
-                        ]);
-                        break;
+                        case 'this_week':
+                            $query->whereBetween('visitDate', [
+                                now()->startOfWeek(\Carbon\Carbon::MONDAY),
+                                now()->endOfWeek(\Carbon\Carbon::MONDAY),
+                            ]);
+                            break;
 
-                    case 'this_month':
-                        $query->whereYear('visitDate', now()->year)
-                              ->whereMonth('visitDate', now()->month);
-                        break;
-                }
-            }),
-    ]);
-}
+                        case 'this_month':
+                            $query->whereYear('visitDate', now()->year)
+                                ->whereMonth('visitDate', now()->month);
+                            break;
+                    }
+                }),
+        ]);
+    }
 }
