@@ -35,7 +35,7 @@ class DashboardController extends Controller
 
         $todaySchedules = VisitationSchedule::query()
         ->published()
-        ->whereDate('visitDate', Carbon::today()) // hoặc created_at nếu chưa có cột ngày thăm
+        ->whereDate('visitDate', Carbon::now('Asia/Ho_Chi_Minh')) // hoặc created_at nếu chưa có cột ngày thăm
         ->select(
             'visitTime',
             DB::raw('COUNT(*) as booked_count')
