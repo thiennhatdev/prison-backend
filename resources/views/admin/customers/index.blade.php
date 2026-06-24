@@ -139,6 +139,7 @@
                 <thead>
                     <tr>
                         <th>ID</th>
+                        <th>Zalo ID</th>
                         <th>Họ tên</th>
                         <th>Quyền</th>
                         <th>Trạng thái</th>
@@ -153,6 +154,10 @@
 
                         <td>
                             {{ $customer->id }}
+                        </td>
+
+                        <td>
+                            {{ $customer->zalo_id }}
                         </td>
 
                         <td>

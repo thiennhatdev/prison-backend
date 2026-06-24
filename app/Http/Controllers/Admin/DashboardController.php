@@ -6,8 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Customer;
 use App\Models\VisitationSchedule;
-
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -31,6 +32,26 @@ class DashboardController extends Controller
             $customerQuery->whereDate('created_at', '<=', $toDate);
             $scheduleQuery->whereDate('created_at', '<=', $toDate);
         }
+
+        $todaySchedules = VisitationSchedule::query()
+        ->published()
+        ->whereDate('visitDate', Carbon::today()) // hoặc created_at nếu chưa có cột ngày thăm
+        ->select(
+            'visitTime',
+            DB::raw('COUNT(*) as booked_count')
+        )
+        ->groupBy('visitTime')
+        ->orderBy('visitTime')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'time' => Carbon::createFromFormat('H:i:s', $item->visitTime)
+                        ->format('H:i'),
+                'booked' => $item->booked_count,
+                'available' => 9 - $item->booked_count,
+                'total' => 9,
+            ];
+        });
 
         return view('admin.thongke.index', [
             'fromDate' => $fromDate,
@@ -65,6 +86,8 @@ class DashboardController extends Controller
                         ->orWhere('published', 0);
                 })
                 ->count(),
+            'todaySchedules' => $todaySchedules,
+
         ]);
     }
 }

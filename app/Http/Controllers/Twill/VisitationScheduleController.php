@@ -17,6 +17,7 @@ use App\Models\Customer;
 use A17\Twill\Services\Listings\Filters\TableFilters;
 use A17\Twill\Services\Listings\Filters\BasicFilter;
 use Illuminate\Support\Collection;
+use Carbon\Carbon;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -160,6 +161,14 @@ class VisitationScheduleController extends BaseModuleController
         return $form;
     }
 
+    public function getVisitTimeLabelAttribute(): string
+    {
+        $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
+
+        return $start->format('H:i') . ' - ' .
+            $start->copy()->addMinutes(60)->format('H:i');
+    }
+
     /**
      * This is an example and can be removed if no modifications are needed to the table.
      */
@@ -175,10 +184,6 @@ class VisitationScheduleController extends BaseModuleController
 
         $table->add(
             Text::make()->field('refuse')->title('Lý do từ chối')
-        );
-
-        $table->add(
-            Text::make()->field('visitTime')->title('Giờ thăm')
         );
 
         $table->add(

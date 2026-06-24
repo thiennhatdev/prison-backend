@@ -24,4 +24,5 @@ class VisitationScheduleRepository extends ModuleRepository
     protected $jsonRepeaters = [
         'relatives',
     ];
+
 }

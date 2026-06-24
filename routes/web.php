@@ -9,6 +9,10 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/login', function () {
+    return redirect('/admin/login');
+})->name('login');
+
 Route::get('/admin', [\App\Http\Controllers\Admin\DashboardController::class, 'index']);
 
 // Route::prefix('admin')
