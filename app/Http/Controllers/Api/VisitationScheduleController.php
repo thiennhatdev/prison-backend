@@ -42,11 +42,26 @@ class VisitationScheduleController extends Controller
         $today = Carbon::today();
 
         // 1. Phải là ngày tương lai
-        if ($visitDate->lte($today)) {
+        // if ($visitDate->lte($today)) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Ngày thăm phải lớn hơn ngày hiện tại'
+        //     ], 422);
+        // }
+
+        $visitDateTime = Carbon::parse(
+            $request->visitDate . ' ' . $request->visitTime,
+            'Asia/Ho_Chi_Minh'
+        );
+
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
+
+        if ($visitDateTime->lte($now->copy()->addMinutes(30))) {
             return response()->json([
                 'success' => false,
-                'message' => 'Ngày thăm phải lớn hơn ngày hiện tại'
+                'message' => 'Vui lòng đăng ký trước giờ thăm ít nhất 30 phút'
             ], 422);
+
         }
 
         // 2. Không quá 2 tháng kể từ hôm nay
