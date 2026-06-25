@@ -72,7 +72,7 @@
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
     gap:20px;
-    padding:30px;
+    padding:10px 30px;
 }
 
 .dashboard-card{
@@ -162,10 +162,41 @@
         </span>
     </div>
         @empty
-            <p>Chưa có lịch đặt hôm nay</p>
+            <p>Chưa có lịch đặt Ngày mai</p>
         @endforelse
     </div>
 </div>
+
+<div class="container dashboard-grid">
+    <div class="dashboard-card ">
+        <h3>🕒 Khung giờ đặt Ngày kia</h3>
+
+        @forelse($afterTomorrowSchedules as $slot)
+            <div class="dashboard-item">
+        <div>
+            <strong>{{ $slot['time'] }}</strong>
+            <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
+                <div
+                    style="
+                        width: {{ ($slot['booked'] / 9) * 100 }}%;
+                        height:100%;
+                        background:#22c55e;
+                        border-radius:10px;
+                    ">
+                </div>
+            </div>
+        </div>
+
+        <span class="dashboard-number">
+            {{ $slot['booked'] }}/9
+        </span>
+    </div>
+        @empty
+            <p>Chưa có lịch đặt Ngày kia</p>
+        @endforelse
+    </div>
+</div>
+
 
 <form method="GET" class="dashboard-filter container">
     <div>

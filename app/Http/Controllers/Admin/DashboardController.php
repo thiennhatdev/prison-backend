@@ -57,6 +57,7 @@ class DashboardController extends Controller
 
         $today = $this->getScheduleStats(now('Asia/Ho_Chi_Minh'));
         $tomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay());
+        $afterTomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay(2));
 
         return view('admin.thongke.index', [
             'fromDate' => $fromDate,
@@ -93,6 +94,7 @@ class DashboardController extends Controller
                 ->count(),
             'todaySchedules' => $today,
             'tomorrowSchedules' => $tomorrow,
+            'afterTomorrowSchedules' => $afterTomorrow,
 
         ]);
     }
