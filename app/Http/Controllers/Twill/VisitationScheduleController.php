@@ -25,6 +25,12 @@ use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 class VisitationScheduleController extends BaseModuleController
 {
     protected $moduleName = 'visitationSchedules';
+
+    protected $defaultOrders = [
+        'visitDate' => 'asc',
+        'visitTime' => 'asc',
+    ];
+
     /**
      * This method can be used to enable/disable defaults. See setUpController in the docs for available options.
      */

@@ -12,6 +12,28 @@ use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    private function getScheduleStats(Carbon $date)
+{
+    return VisitationSchedule::query()
+        ->published()
+        ->whereDate('visitDate', $date)
+        ->select(
+            'visitTime',
+            DB::raw('COUNT(*) as booked_count')
+        )
+        ->groupBy('visitTime')
+        ->orderBy('visitTime')
+        ->get()
+        ->map(function ($item) {
+            return [
+                'time' => Carbon::parse($item->visitTime)->format('H:i'),
+                'booked' => $item->booked_count,
+                'available' => 9 - $item->booked_count,
+                'total' => 9,
+            ];
+        });
+}
+
     public function index(Request $request)
     {
         $fromDate = $request->from_date;
@@ -33,25 +55,8 @@ class DashboardController extends Controller
             $scheduleQuery->whereDate('created_at', '<=', $toDate);
         }
 
-        $todaySchedules = VisitationSchedule::query()
-        ->published()
-        ->whereDate('visitDate', Carbon::now('Asia/Ho_Chi_Minh')) // hoặc created_at nếu chưa có cột ngày thăm
-        ->select(
-            'visitTime',
-            DB::raw('COUNT(*) as booked_count')
-        )
-        ->groupBy('visitTime')
-        ->orderBy('visitTime')
-        ->get()
-        ->map(function ($item) {
-            return [
-                'time' => Carbon::createFromFormat('H:i:s', $item->visitTime)
-                        ->format('H:i'),
-                'booked' => $item->booked_count,
-                'available' => 9 - $item->booked_count,
-                'total' => 9,
-            ];
-        });
+        $today = $this->getScheduleStats(now('Asia/Ho_Chi_Minh'));
+        $tomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay());
 
         return view('admin.thongke.index', [
             'fromDate' => $fromDate,
@@ -86,7 +91,8 @@ class DashboardController extends Controller
                         ->orWhere('published', 0);
                 })
                 ->count(),
-            'todaySchedules' => $todaySchedules,
+            'todaySchedules' => $today,
+            'tomorrowSchedules' => $tomorrow,
 
         ]);
     }
