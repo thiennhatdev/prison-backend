@@ -41,14 +41,6 @@ class VisitationScheduleController extends Controller
         $visitDate = Carbon::parse($request->visitDate);
         $today = Carbon::today();
 
-        // 1. Phải là ngày tương lai
-        // if ($visitDate->lte($today)) {
-        //     return response()->json([
-        //         'success' => false,
-        //         'message' => 'Ngày thăm phải lớn hơn ngày hiện tại'
-        //     ], 422);
-        // }
-
         $visitDateTime = Carbon::parse(
             $request->visitDate . ' ' . $request->visitTime,
             'Asia/Ho_Chi_Minh'
@@ -79,19 +71,7 @@ class VisitationScheduleController extends Controller
                 'message' => 'Không được đăng ký lịch thăm vào Chủ nhật'
             ], 422);
         }
-
-        // 4. Mỗi khung giờ tối đa 9 lượt
-        $slotCount = VisitationSchedule::whereDate('visitDate', $request->visitDate)
-            ->where('visitTime', $request->visitTime)
-            ->count();
-
-        if ($slotCount >= 9) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Khung giờ này đã đủ 9 lượt đăng ký'
-            ], 422);
-        }
-
+        
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
         $exists = VisitationSchedule::whereHas('translations', function ($query) use ($request) {
                 $query->where('locale', 'en')

@@ -56,6 +56,7 @@ class AuthController extends Controller
     {
        
         $zaloToken = $request->access_token;
+        $name = $request->name;
 
         // Call Zalo API lấy profile
 
@@ -75,7 +76,7 @@ class AuthController extends Controller
         $customer = Customer::firstOrCreate(
             ['zalo_id' => $profile['id']],
             [
-                'name' => $profile['name'] ?? null,
+                'name' => $profile['name'] ?? $name ?? null,
                 'role' => "CUSTOMER"
             ]
         );
