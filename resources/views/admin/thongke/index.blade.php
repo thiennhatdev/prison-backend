@@ -299,6 +299,12 @@
                 {{ $totalSchedulesDraft }}
             </span>
         </div>
+        <div class="dashboard-item">
+            <span>Đã thăm gặp thành công</span>
+            <span class="dashboard-number">
+                {{ $totalSchedulesDone }}
+            </span>
+        </div>
     </div>
 
 </div>

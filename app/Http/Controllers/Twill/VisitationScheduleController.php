@@ -207,7 +207,7 @@ protected function getIndexTableColumns(): TableColumns
     $columns->add(
         Text::make()
             ->field('title')
-            ->title('Tiêu đề')
+            ->title('Tên phạm nhân')
             ->sortable()
             ->linkToEdit()
     );

@@ -92,6 +92,10 @@ class DashboardController extends Controller
                         ->orWhere('published', 0);
                 })
                 ->count(),
+            'totalSchedulesDone' => (clone $scheduleQuery)
+                ->published()
+                ->where('status', 'DONE')
+                ->count(),
             'todaySchedules' => $today,
             'tomorrowSchedules' => $tomorrow,
             'afterTomorrowSchedules' => $afterTomorrow,
