@@ -94,7 +94,7 @@ class VisitationScheduleController extends Controller
             ->where('visitTime', $request->visitTime)
             ->count();
 
-        if ($bookedCount > 9) {
+        if ($bookedCount >= 9) {
             return response()->json([
                 'success' => false,
                 'message' => 'Khung giờ này đã đủ 9 lượt đăng ký, vui lòng chọn khung giờ khác.'
