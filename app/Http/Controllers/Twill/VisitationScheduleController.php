@@ -15,6 +15,8 @@ use A17\Twill\Services\Forms\Option;
 use App\Repositories\PrisonerRepository;
 use App\Models\Customer;
 use A17\Twill\Services\Listings\Filters\TableFilters;
+use A17\Twill\Services\Listings\Filters\TableMainFilters;
+use A17\Twill\Services\Listings\Filters\MainFilter;
 use A17\Twill\Services\Listings\Filters\BasicFilter;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
@@ -177,69 +179,69 @@ class VisitationScheduleController extends BaseModuleController
     }
 
    protected function getIndexData(array $prependScope = []): array
-{
-    $data = parent::getIndexData($prependScope);
+    {
+        $data = parent::getIndexData($prependScope);
 
-    foreach ($data['tableData'] as $index => &$item) {
-        $item['stt'] = $index + 1;
+        foreach ($data['tableData'] as $index => &$item) {
+            $item['stt'] = $index + 1;
+        }
+
+        return $data;
     }
 
-    return $data;
-}
+    protected function getIndexTableColumns(): TableColumns
+    {
+        $columns = TableColumns::make();
 
-protected function getIndexTableColumns(): TableColumns
-{
-    $columns = TableColumns::make();
+        $columns->add(
+            PublishStatus::make()
+                ->title('Published')
+                ->sortable()
+                ->optional()
+        );
 
-    $columns->add(
-        PublishStatus::make()
-            ->title('Published')
-            ->sortable()
-            ->optional()
-    );
+        $columns->add(
+            Text::make()
+                ->field('stt')
+                ->title('STT')
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('stt')
-            ->title('STT')
-    );
+        $columns->add(
+            Text::make()
+                ->field('title')
+                ->title('Tên phạm nhân')
+                ->sortable()
+                ->linkToEdit()
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('title')
-            ->title('Tên phạm nhân')
-            ->sortable()
-            ->linkToEdit()
-    );
+        $columns->add(
+            Text::make()
+                ->field('status_label')
+                ->title('Trạng thái')
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('status_label')
-            ->title('Trạng thái')
-    );
+        $columns->add(
+            Text::make()
+                ->field('refuse')
+                ->title('Lý do từ chối')
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('refuse')
-            ->title('Lý do từ chối')
-    );
+        $columns->add(
+            Text::make()
+                ->field('visitDate')
+                ->title('Ngày thăm')
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('visitDate')
-            ->title('Ngày thăm')
-    );
+        $columns->add(
+            Text::make()
+                ->field('visit_time_label')
+                ->title('Giờ thăm')
+        );
 
-    $columns->add(
-        Text::make()
-            ->field('visit_time_label')
-            ->title('Giờ thăm')
-    );
+        return $columns;
+    }
 
-    return $columns;
-}
-
-public function filters(): TableFilters
+    public function filters(): TableFilters
     {
         return TableFilters::make([
             BasicFilter::make()
@@ -279,6 +281,40 @@ public function filters(): TableFilters
                             break;
                     }
                 }),
+            
+                BasicFilter::make()
+            ->label('Trạng thái')
+            ->queryString('status_filter')
+            ->options(collect([
+                'refused' => 'Đã từ chối',
+                'done' => 'Đã thăm',
+                'not_yet' => 'Sắp tới',
+            ]))
+            ->apply(function ($query, $value) {
+                switch ($value) {
+                    case 'refused':
+                        $query->whereNotNull('refuse')
+                              ->where('refuse', '<>', '');
+                        break;
+
+                    case 'done':
+                        $query->where('status', 'DONE')
+                              ->where(function ($q) {
+                                  $q->whereNull('refuse')
+                                    ->orWhere('refuse', '');
+                              });
+                        break;
+
+                    case 'not_yet':
+                        $query->where('status', 'NOT_YET')
+                              ->where(function ($q) {
+                                  $q->whereNull('refuse')
+                                    ->orWhere('refuse', '');
+                              });
+                        break;
+                }
+            }),
         ]);
     }
+
 }
