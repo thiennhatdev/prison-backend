@@ -425,6 +425,31 @@
         </div>
     </div>
 
+    <div class="dashboard-card">
+        <h3>📜 Nội quy</h3>
+
+        <div class="dashboard-item">
+            <span>Tổng số nội quy</span>
+            <span class="dashboard-number">
+                {{ $totalPrisonRules }}
+            </span>
+        </div>
+
+        <div class="dashboard-item">
+            <span>Đã phê duyệt</span>
+            <span class="dashboard-number">
+                {{ $publishedPrisonRules }}
+            </span>
+        </div>
+
+        <div class="dashboard-item">
+            <span>Chưa phê duyệt</span>
+            <span class="dashboard-number">
+                {{ $draftPrisonRules }}
+            </span>
+        </div>
+    </div>
+
 </div>
 @if($hasFilter)
 <div class="container" style="padding: 10px 30px">

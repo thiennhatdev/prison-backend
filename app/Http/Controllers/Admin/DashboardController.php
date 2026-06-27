@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Customer;
 use App\Models\VisitationSchedule;
+use App\Models\PrisonRule;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -44,44 +45,48 @@ class DashboardController extends Controller
         $postQuery = Post::query();
         $customerQuery = Customer::query();
         $scheduleQuery = VisitationSchedule::query();
+        $scheduleQuery = VisitationSchedule::query();
+        $prisonRuleQuery = PrisonRule::query();
 
         $hasFilter = $request->filled('prisoner_name')
-    || $request->filled('from_date')
-    || $request->filled('to_date');
+            || $request->filled('from_date')
+            || $request->filled('to_date');
 
-    $prisoners = collect();
+        $prisoners = collect();
 
-    if ($hasFilter) {
-        $listQuery = VisitationSchedule::query()->with('customer');
+        if ($hasFilter) {
+            $listQuery = VisitationSchedule::query()->with('customer');
 
-        if ($prisonerName) {
-            $listQuery->where('prisoner_name', 'like', "%{$prisonerName}%");
+            if ($prisonerName) {
+                $listQuery->where('prisoner_name', 'like', "%{$prisonerName}%");
+            }
+
+            if ($fromDate) {
+                $listQuery->whereDate('visitDate', '>=', $fromDate);
+            }
+
+            if ($toDate) {
+                $listQuery->whereDate('visitDate', '<=', $toDate);
+            }
+
+            $prisoners = $listQuery
+                ->orderBy('visitDate')
+                ->orderBy('visitTime')
+                ->get();
         }
-
-        if ($fromDate) {
-            $listQuery->whereDate('visitDate', '>=', $fromDate);
-        }
-
-        if ($toDate) {
-            $listQuery->whereDate('visitDate', '<=', $toDate);
-        }
-
-        $prisoners = $listQuery
-            ->orderBy('visitDate')
-            ->orderBy('visitTime')
-            ->get();
-    }
 
         if ($fromDate) {
             $postQuery->whereDate('created_at', '>=', $fromDate);
             $customerQuery->whereDate('created_at', '>=', $fromDate);
             $scheduleQuery->whereDate('created_at', '>=', $fromDate);
+            $prisonRuleQuery->whereDate('created_at', '>=', $fromDate);
         }
 
         if ($toDate) {
             $postQuery->whereDate('created_at', '<=', $toDate);
             $customerQuery->whereDate('created_at', '<=', $toDate);
             $scheduleQuery->whereDate('created_at', '<=', $toDate);
+            $prisonRuleQuery->whereDate('created_at', '<=', $toDate);
         }
 
         $today = $this->getScheduleStats(now('Asia/Ho_Chi_Minh'));
@@ -101,6 +106,16 @@ class DashboardController extends Controller
                 ->published()
                 ->count(),
             'draftPosts' => (clone $postQuery)
+                ->where(function ($q) {
+                    $q->whereNull('published')
+                        ->orWhere('published', 0);
+                })
+                ->count(),
+            'totalPrisonRules' => (clone $prisonRuleQuery)->count(),
+            'publishedPrisonRules' => (clone $prisonRuleQuery)
+                ->published()
+                ->count(),
+            'draftPrisonRules' => (clone $prisonRuleQuery)
                 ->where(function ($q) {
                     $q->whereNull('published')
                         ->orWhere('published', 0);
