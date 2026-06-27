@@ -42,7 +42,7 @@ return [
     'create-new' => 'Tạo mới',
     'empty-message' => 'Bạn chưa có hoạt động nào.',
     'my-activity' => 'Hoạt động của tôi',
-    'my-drafts' => 'Bản nháp của tôi',
+    'my-drafts' => 'Chưa phê duyệt của tôi',
     'search-placeholder' => 'Tìm kiếm mọi thứ...',
     'statitics' => 'Thống kê',
 
@@ -56,7 +56,7 @@ return [
         'created' => 'Đã tạo',
         'updated' => 'Đã cập nhật',
         'unpublished' => 'Đã hủy xuất bản',
-        'published' => 'Đã xuất bản',
+        'published' => 'Đã phê duyệt',
         'featured' => 'Đã đánh dấu nổi bật',
         'unfeatured' => 'Đã bỏ nổi bật',
         'restored' => 'Đã khôi phục',
@@ -220,9 +220,9 @@ return [
         'no' => 'Không',
         'yes' => 'Có',
         'all-items' => 'Tất cả',
-        'draft' => 'Bản nháp',
+        'draft' => 'Chưa phê duyệt',
         'mine' => 'Của tôi',
-        'published' => 'Đã xuất bản',
+        'published' => 'Đã phê duyệt',
         'trash' => 'Thùng rác',
         'not-set' => 'Chưa thiết lập',
     ],
@@ -284,7 +284,7 @@ return [
 
     'publish' => [
         'unpublished' => 'Đã hủy xuất bản :modelTitle!',
-        'published' => 'Đã xuất bản :modelTitle!',
+        'published' => 'Đã phê duyệt :modelTitle!',
         'error' => 'Không thể xuất bản :modelTitle. Đã xảy ra lỗi!',
     ],
 
@@ -302,14 +302,14 @@ return [
 
     'bulk-publish' => [
         'unpublished' => 'Đã hủy xuất bản các mục :modelTitle!',
-        'published' => 'Đã xuất bản các mục :modelTitle!',
+        'published' => 'Đã phê duyệt các mục :modelTitle!',
         'error' => 'Không thể xuất bản các mục :modelTitle. Đã xảy ra lỗi!',
     ],
 ],
 
 'main' => [
     'create' => 'Tạo mới',
-    'draft' => 'Bản nháp',
+    'draft' => 'Chưa phê duyệt',
     'published' => 'Đang hoạt động',
     'title' => 'Tiêu đề',
     'update' => 'Cập nhật',
@@ -449,13 +449,13 @@ return [
 
     'published-on' => 'Xuất bản lúc',
 
-    'restore-draft' => 'Khôi phục thành bản nháp',
-    'restore-draft-close' => 'Khôi phục thành bản nháp và đóng',
-    'restore-draft-new' => 'Khôi phục thành bản nháp và tạo mới',
+    'restore-draft' => 'Khôi phục thành Chưa phê duyệt',
+    'restore-draft-close' => 'Khôi phục thành Chưa phê duyệt và đóng',
+    'restore-draft-new' => 'Khôi phục thành Chưa phê duyệt và tạo mới',
 
-    'restore-live' => 'Khôi phục thành bản đã xuất bản',
-    'restore-live-close' => 'Khôi phục thành bản đã xuất bản và đóng',
-    'restore-live-new' => 'Khôi phục thành bản đã xuất bản và tạo mới',
+    'restore-live' => 'Khôi phục thành bản Đã phê duyệt',
+    'restore-live-close' => 'Khôi phục thành bản Đã phê duyệt và đóng',
+    'restore-live-new' => 'Khôi phục thành bản Đã phê duyệt và tạo mới',
 
     'restore-message' => 'Bạn đang chỉnh sửa một phiên bản cũ của nội dung này (được lưu bởi :user vào :date). Hãy thực hiện thay đổi nếu cần và nhấn Khôi phục để tạo một phiên bản mới.',
 
@@ -463,9 +463,9 @@ return [
 
     'revisions' => 'Các phiên bản',
 
-    'save' => 'Lưu bản nháp',
-    'save-close' => 'Lưu bản nháp và đóng',
-    'save-new' => 'Lưu bản nháp và tạo mới',
+    'save' => 'Lưu Chưa phê duyệt',
+    'save-close' => 'Lưu Chưa phê duyệt và đóng',
+    'save-new' => 'Lưu Chưa phê duyệt và tạo mới',
 
     'save-success' => 'Đã lưu nội dung thành công!',
 
@@ -486,13 +486,13 @@ return [
 
     'unsaved-changes' => 'Có thay đổi chưa được lưu',
 
-    'draft-revision' => 'Lưu thành phiên bản nháp',
-    'draft-revision-close' => 'Lưu thành phiên bản nháp và đóng',
-    'draft-revision-new' => 'Lưu thành phiên bản nháp và tạo mới',
+    'draft-revision' => 'Lưu thành phiên Chưa phê duyệt',
+    'draft-revision-close' => 'Lưu thành phiên Chưa phê duyệt và đóng',
+    'draft-revision-new' => 'Lưu thành phiên Chưa phê duyệt và tạo mới',
 
-    'draft-revisions-available' => 'Bạn đang xem phiên bản đã xuất bản của nội dung này. Có các phiên bản nháp mới hơn đang khả dụng.',
+    'draft-revisions-available' => 'Bạn đang xem phiên bản Đã phê duyệt của nội dung này. Có các phiên Chưa phê duyệt mới hơn đang khả dụng.',
 
-    'editing-draft-revision' => 'Bạn đang chỉnh sửa một phiên bản nháp của nội dung này. Hãy thực hiện thay đổi nếu cần và nhấn Lưu phiên bản hoặc Xuất bản.',
+    'editing-draft-revision' => 'Bạn đang chỉnh sửa một phiên Chưa phê duyệt của nội dung này. Hãy thực hiện thay đổi nếu cần và nhấn Lưu phiên bản hoặc Xuất bản.',
 ],
 
 'select' => [

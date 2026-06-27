@@ -36,12 +36,41 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
+        $prisonerName = $request->prisoner_name;
+
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
 
         $postQuery = Post::query();
         $customerQuery = Customer::query();
         $scheduleQuery = VisitationSchedule::query();
+
+        $hasFilter = $request->filled('prisoner_name')
+    || $request->filled('from_date')
+    || $request->filled('to_date');
+
+    $prisoners = collect();
+
+    if ($hasFilter) {
+        $listQuery = VisitationSchedule::query()->with('customer');
+
+        if ($prisonerName) {
+            $listQuery->where('prisoner_name', 'like', "%{$prisonerName}%");
+        }
+
+        if ($fromDate) {
+            $listQuery->whereDate('visitDate', '>=', $fromDate);
+        }
+
+        if ($toDate) {
+            $listQuery->whereDate('visitDate', '<=', $toDate);
+        }
+
+        $prisoners = $listQuery
+            ->orderBy('visitDate')
+            ->orderBy('visitTime')
+            ->get();
+    }
 
         if ($fromDate) {
             $postQuery->whereDate('created_at', '>=', $fromDate);
@@ -60,6 +89,10 @@ class DashboardController extends Controller
         $afterTomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay(2));
 
         return view('admin.thongke.index', [
+            'prisonerName' => $prisonerName,
+            'hasFilter' => $hasFilter,
+            'prisoners' => $prisoners,
+
             'fromDate' => $fromDate,
             'toDate' => $toDate,
 

@@ -55,20 +55,26 @@ class VisitationSchedule extends Model implements Sortable
             return $this->belongsTo(Customer::class);
         }
 
-    public function getStatusLabelAttribute()
-    {
-        return [
-            'NOT_YET' => 'Sắp tới',
-            'DONE' => 'Đã thăm',
-        ][$this->status] ?? '';
-    }
-
     public function getVisitTimeLabelAttribute(): string
     {
         $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
         
         return $start->format('H:i') . ' - ' .
             $start->copy()->addHour()->format('H:i');
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        // Nếu có lý do từ chối thì ưu tiên hiển thị "Từ chối"
+        if (!empty($this->refuse)) {
+            return 'Từ chối';
+        }
+
+        return match ($this->status) {
+            'DONE' => 'Đã thăm',
+            'NOT_YET' => 'Sắp tới',
+            default => 'Không xác định',
+        };
     }
     
 }

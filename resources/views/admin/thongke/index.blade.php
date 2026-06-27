@@ -101,6 +101,113 @@
 .dashboard-number{
     font-weight:700;
 }
+
+.report-card{
+    margin-top:30px;
+    background:#fff;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,.08);
+    overflow:hidden;
+}
+
+.report-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:18px 24px;
+    border-bottom:1px solid #eee;
+}
+
+.report-header h3{
+    margin:0;
+    font-size:18px;
+    font-weight:600;
+}
+
+.report-header span{
+    background:#eef5ff;
+    color:#2563eb;
+    padding:6px 12px;
+    border-radius:30px;
+    font-size:13px;
+    font-weight:600;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+.input-search-name {
+    height: 42px;
+    padding: 0 12px;
+    border: 1px solid #dcdfe6;
+    border-radius: 10px;
+    outline: none;
+}
+
+.report-table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+.report-table thead{
+    background:#f8fafc;
+}
+
+.report-table th{
+    padding:14px 16px;
+    text-align:left;
+    font-size:14px;
+    font-weight:600;
+    color:#555;
+    border-bottom:1px solid #e5e7eb;
+}
+
+.report-table td{
+    padding:14px 16px;
+    border-bottom:1px solid #f1f1f1;
+    vertical-align:middle;
+}
+
+.report-table tbody tr:hover{
+    background:#fafafa;
+}
+
+.report-table small{
+    color:#888;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:20px;
+    background:#eef6ff;
+    color:#2563eb;
+    font-size:13px;
+    font-weight:600;
+}
+
+.empty-state{
+    text-align:center;
+    padding:50px;
+    color:#888;
+    font-size:15px;
+}
+
+.badge-success{
+    background:#dcfce7;
+    color:#15803d;
+}
+
+.badge-danger{
+    background:#fee2e2;
+    color:#dc2626;
+}
+
+.badge-warning{
+    background:#fef3c7;
+    color:#b45309;
+}
 </style>
 
 @endpush
@@ -200,6 +307,16 @@
 
 <form method="GET" class="dashboard-filter container">
     <div>
+        <label>Tên phạm nhân</label>
+        <input
+            type="text"
+            name="prisoner_name"
+            value="{{ $prisonerName }}"
+            placeholder="Nhập tên phạm nhân"
+            class="input-search-name"
+        >
+    </div>    
+    <div>
         <label>Từ ngày</label>
         <input
             type="date"
@@ -228,6 +345,7 @@
 
 <div class="dashboard-grid container">
 
+
     <div class="dashboard-card">
         <h3>📰 Tin tức</h3>
 
@@ -239,14 +357,14 @@
         </div>
 
         <div class="dashboard-item">
-            <span>Đã xuất bản</span>
+            <span>Đã phê duyệt</span>
             <span class="dashboard-number">
                 {{ $publishedPosts }}
             </span>
         </div>
 
         <div class="dashboard-item">
-            <span>Bản nháp</span>
+            <span>Chưa phê duyệt</span>
             <span class="dashboard-number">
                 {{ $draftPosts }}
             </span>
@@ -308,5 +426,68 @@
     </div>
 
 </div>
+@if($hasFilter)
+<div class="container" style="padding: 10px 30px">
+    <div class="report-card ">
+
+        <div class="report-header">
+            <h3>Kết quả tìm kiếm</h3>
+            <span>{{ $prisoners->count() }} bản ghi</span>
+        </div>
+
+        @if($prisoners->isEmpty())
+            <div class="empty-state">
+                Không tìm thấy dữ liệu.
+            </div>
+        @else
+            <div class="table-wrapper">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Phạm nhân</th>
+                            <th>Ngày giờ</th>
+                            <th>Thân nhân</th>
+                            <th>Quan hệ</th>
+                            <th>Số người thăm</th>
+                            <th>Trạng thái</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach($prisoners as $prisoner)
+                            <tr>
+                                <td>{{ $prisoner->prisoner_name }}</td>
+
+                                <td>
+                                    {{ \Carbon\Carbon::parse($prisoner->visitDate)->format('d/m/Y') }}
+                                    <br>
+                                    <small>{{ \Carbon\Carbon::parse($prisoner->visitTime)->format('H:i') }}</small>
+                                </td>
+
+                                <td>{{ $prisoner->relatives[0]['username'] }}</td>
+
+                                <td>{{ \App\Enums\RelationshipEnum::labelOf($prisoner->relatives[0]['relationship'] ?? null) }}</td>
+
+                                <td>{{ $prisoner->count }}</td>
+
+                                <td>
+                                    <span class="status-badge
+                                        @if($prisoner->status_label == 'Đã thăm') badge-success
+                                        @elseif($prisoner->status_label == 'Từ chối') badge-danger
+                                        @else badge-warning
+                                        @endif">
+                                        {{ $prisoner->status_label }}
+                                    </span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+
+    </div>
+</div>
+@endif
 
 @endsection
