@@ -8,6 +8,7 @@ use A17\Twill\Services\Listings\TableColumns;
 use A17\Twill\Services\Forms\Fields\Input;
 use A17\Twill\Services\Forms\Form;
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
+use A17\Twill\Services\Forms\Fields\Wysiwyg;
 
 class SurveyController extends BaseModuleController
 {
@@ -27,16 +28,16 @@ class SurveyController extends BaseModuleController
     {
         $form = parent::getForm($model);
 
-        $form->add(
-            Input::make()->name('code')->label('Code')
-        );
+        // $form->add(
+        //     Input::make()->name('code')->label('Code')
+        // );
 
         $form->add(
             Input::make()->name('point')->label('Điểm đánh giá')
         );
 
         $form->add(
-            Input::make()->name('description')->label('Nội dung')
+            Wysiwyg::make()->name('description')->label('Nội dung')
         );
 
         return $form;
