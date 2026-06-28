@@ -23,6 +23,7 @@ Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
     Route::put('/allow-visit/{id}', [VisitationScheduleController::class, 'updateStatus']);
 });
 
+
 Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
     Route::get('/user/me', [AuthController::class, 'info']);
@@ -34,4 +35,5 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
     Route::get('/visit-nearest', [VisitationScheduleController::class, 'nearest']);
     Route::get('/visitation-schedules', [VisitationScheduleController::class, 'list']);
+    Route::post('/survey', [SurveyController::class, 'create']);
 });

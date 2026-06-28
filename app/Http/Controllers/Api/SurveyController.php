@@ -44,12 +44,12 @@ class SurveyController extends Controller
      public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
             'description' => 'required|string',
+            'point' => 'required|integer',
         ], [
-            'title.required' => 'Title là bắt buộc',
             'description.required' => 'Đánh giá là bắt buộc',
-            
+            'point.required' => 'Điểm đánh giá là bắt buộc',
+            'point.integer' => 'Điểm đánh giá phải là số'
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +61,7 @@ class SurveyController extends Controller
         }
 
         $survey = Survey::create([
-            'title' => $request->title,
+            'title' => $request->user()->name,
             'description' => $request->description,
             'code' => $request->code,
             'point' => $request->point,
