@@ -43,17 +43,30 @@ class SurveyController extends BaseModuleController
         return $form;
     }
 
-    /**
-     * This is an example and can be removed if no modifications are needed to the table.
-     */
-    protected function additionalIndexTableColumns(): TableColumns
+    protected function getIndexTableColumns(): TableColumns
     {
-        $table = parent::additionalIndexTableColumns();
+        $columns = TableColumns::make();
 
-        $table->add(
-            Text::make()->field('description')->title('Nội dung')
+        $columns->add(
+            Text::make()
+                ->field('title')
+                ->title('Đánh giá của')
+                ->linkToEdit()
         );
 
-        return $table;
+
+        $columns->add(
+            Text::make()
+                ->field('description')
+                ->title('Đánh giá')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('point')
+                ->title('Điểm')
+        );
+
+        return $columns;
     }
 }

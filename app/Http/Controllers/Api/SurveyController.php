@@ -65,6 +65,7 @@ class SurveyController extends Controller
             'description' => $request->description,
             'code' => $request->code,
             'point' => $request->point,
+            'published' => 1,
         ]);
 
         return response()->json([
