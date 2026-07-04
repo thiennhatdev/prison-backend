@@ -73,13 +73,26 @@ class AuthController extends Controller
             ]
         )->json();
 
+        if (!isset($profile['id'])) {
+            return response()->json([
+                'message' => 'Access token không hợp lệ.'
+            ], 401);
+        }
+
         $customer = Customer::firstOrCreate(
             ['zalo_id' => $profile['id']],
             [
                 'name' => $profile['name'] ?? $name ?? null,
-                'role' => "CUSTOMER"
+                'role' => "CUSTOMER",
+                'is_active' => 1,
             ]
         );
+
+        if (!$customer->is_active) {
+            return response()->json([
+                'message' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.'
+            ], 403);
+        }
 
         $token = $customer->createToken('miniapp')->plainTextToken;
 
