@@ -13,6 +13,9 @@ use A17\Twill\Models\Behaviors\Sortable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use A17\Twill\Models\Model;
 use Carbon\Carbon;
+use App\Enums\PtEnum;
+use App\Enums\VisitGroupEnum;
+use App\Enums\ChildVisitGroupEnum;
 
 class VisitationSchedule extends Model implements Sortable
 {
@@ -27,14 +30,21 @@ class VisitationSchedule extends Model implements Sortable
         'prisoner_id',
         'visitDate',
         'visitTime',
+        'visitEndTime',
         'count',
         'qr_token',
         'customer_id',
         'status',
+        'pt',
+        'visitGroup',
+        'childVisitGroup',
+        'identification',
         'prisoner_name',
         'prisoner_birthday',
         'prisoner_address',
+        'prisoner_sex',
         'refuse',
+        'reason'
     ];
     
     public $translatedAttributes = [
@@ -47,7 +57,10 @@ class VisitationSchedule extends Model implements Sortable
     ];
 
     protected $casts = [
-        'relatives' => 'array'
+        'relatives' => 'array',
+        'pt' => PtEnum::class,
+        'visitGroup' => VisitGroupEnum::class,
+        'childVisitGroup' => ChildVisitGroupEnum::class,
     ];
 
     public function customer()

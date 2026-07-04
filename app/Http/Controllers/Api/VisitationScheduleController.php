@@ -65,12 +65,12 @@ class VisitationScheduleController extends Controller
         }
 
         // 3. Không được là Chủ nhật
-        if ($visitDate->isSunday()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không được đăng ký lịch thăm vào Chủ nhật'
-            ], 422);
-        }
+        // if ($visitDate->isSunday()) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Không được đăng ký lịch thăm vào Chủ nhật'
+        //     ], 422);
+        // }
 
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
         $exists = VisitationSchedule::whereHas('translations', function ($query) use ($request) {
@@ -88,18 +88,18 @@ class VisitationScheduleController extends Controller
             ], 422);
         }
 
-        $bookedCount = VisitationSchedule::query()
-            ->published()
-            ->whereDate('visitDate', $request->visitDate)
-            ->where('visitTime', $request->visitTime)
-            ->count();
+        // $bookedCount = VisitationSchedule::query()
+        //     ->published()
+        //     ->whereDate('visitDate', $request->visitDate)
+        //     ->where('visitTime', $request->visitTime)
+        //     ->count();
 
-        if ($bookedCount >= 9) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Khung giờ này đã đủ 9 lượt đăng ký, vui lòng chọn khung giờ khác.'
-            ], 422);
-        }
+        // if ($bookedCount >= 9) {
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'Khung giờ này đã đủ 9 lượt đăng ký, vui lòng chọn khung giờ khác.'
+        //     ], 422);
+        // }
 
         try {
             $schedule = VisitationSchedule::create([

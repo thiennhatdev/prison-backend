@@ -21,6 +21,13 @@ use A17\Twill\Services\Listings\Filters\BasicFilter;
 use Illuminate\Support\Collection;
 use Carbon\Carbon;
 use A17\Twill\Services\Listings\Columns\PublishStatus;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\VisitationScheduleExport;
+use Illuminate\Http\Request;
+use App\Models\VisitationSchedule;
+use App\Enums\PtEnum;
+use App\Enums\VisitGroupEnum;
+use App\Enums\ChildVisitGroupEnum;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -63,6 +70,16 @@ class VisitationScheduleController extends BaseModuleController
             ->name('prisoner_birthday')
             ->label('Năm sinh phạm nhân')
         );
+        $form->add(
+            Select::make()
+                ->name('prisoner_sex')
+                ->label('Giới tính')
+                ->options([
+                    ['value' => 'MALE', 'label' => 'Nam'],
+                    ['value' => 'FEMALE', 'label' => 'Nữ'],
+                ])
+        ) ;
+
         $prisoners = app()->make(PrisonerRepository::class)->listAll();
  
         $arrPrisoner= [];
@@ -73,6 +90,7 @@ class VisitationScheduleController extends BaseModuleController
         $form->add(
             InlineRepeater::make()->name('relatives')->label("thân nhân")
                 ->fields([
+                    Input::make()->name('cccd')->label('CCCD/CMND'),
                     Input::make()->name('username')->label('Họ tên'),
                     Input::make()->name('phone')->label('Số điện thoại'),
                     Input::make()->name('address')->label('Địa chỉ'),
@@ -107,8 +125,45 @@ class VisitationScheduleController extends BaseModuleController
                 ->timeOnly()
                 ->time24Hr()
                 ->altFormat('H:i')
-                ->label('Khung giờ')
+                ->label('Giờ bắt đầu')
 
+        );
+        $form->add(
+            DatePicker::make()
+                ->name('visitEndTime')
+                ->timeOnly()
+                ->time24Hr()
+                ->altFormat('H:i')
+                ->label('Giờ kết thúc')
+
+        );
+
+        $form->add(
+            Select::make()
+                ->name('visitGroup')
+                ->label('Diện thăm gặp')
+                ->options(VisitGroupEnum::options())
+        );
+
+        $form->add(
+            Select::make()
+                ->name('childVisitGroup')
+                ->label('Đại diện cơ quan, tổ chức, cá nhân khác')
+                ->options(ChildVisitGroupEnum::options())
+        );
+
+        $form->add(
+            Input::make()
+            ->name('identification')
+            ->label('Tên cơ quan, tổ chức hoặc mối quan hệ')
+        );
+
+
+        $form->add(
+            Select::make()
+                ->name('pt')
+                ->label('Thuộc phân trại')
+                ->options(PtEnum::options())
         );
 
         $form->add(
@@ -116,6 +171,12 @@ class VisitationScheduleController extends BaseModuleController
             ->type('number')
             ->name('count')
             ->label('Số người thăm')
+        );
+
+         $form->add(
+            Input::make()
+            ->name('reason')
+            ->label('Lý do thăm gặp')
         );
 
         $form->add(
@@ -317,6 +378,81 @@ class VisitationScheduleController extends BaseModuleController
         ]);
     }
 
+    public function additionalTableActions(): array
+    {
+        return [
+            'export' => [
+                'name' => 'Xuất Excel',
+                'variant' => 'primary',
+                'size' => 'small',
+                'link' => route('twill.visitationSchedules.export') . '?' . http_build_query(request()->query()),
+                'target' => '',
+                'type' => 'a',
+            ],
+        ];
+    }
 
+    public function export(Request $request)
+{
+    $query = VisitationSchedule::query()->with('customer');
+    $filters = json_decode($request->get('filter', '{}'), true);
+
+    $dateFilter = $filters['date_filter'] ?? null;
+    $statusFilter = $filters['status_filter'] ?? null;
+
+    switch ($statusFilter) {
+        case 'refused':
+            $query->whereNotNull('refuse')
+                  ->where('refuse', '<>', '');
+            break;
+
+        case 'done':
+            $query->where('status', 'DONE')
+                  ->where(function ($q) {
+                      $q->whereNull('refuse')
+                        ->orWhere('refuse', '');
+                  });
+            break;
+
+        case 'not_yet':
+            $query->where('status', 'NOT_YET')
+                  ->where(function ($q) {
+                      $q->whereNull('refuse')
+                        ->orWhere('refuse', '');
+                  });
+            break;
+    }
+
+    switch ($dateFilter) {
+        case 'today':
+            $query->whereDate('visitDate', now());
+            break;
+
+        case 'tomorrow':
+            $query->whereDate('visitDate', now()->addDay());
+            break;
+
+        case 'yesterday':
+            $query->whereDate('visitDate', now()->subDay());
+            break;
+
+        case 'this_week':
+            $query->whereBetween('visitDate', [
+                now()->startOfWeek(),
+                now()->endOfWeek(),
+            ]);
+            break;
+
+        case 'this_month':
+            $query->whereYear('visitDate', now()->year)
+                  ->whereMonth('visitDate', now()->month);
+            break;
+    }
+
+    return Excel::download(
+        new VisitationScheduleExport($query->get()),
+        'danhsachlichtham.xlsx'
+    );
+}
 
 }

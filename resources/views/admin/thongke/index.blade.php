@@ -222,7 +222,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
-            <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
+            <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
                         width: {{ ($slot['booked'] / 9) * 100 }}%;
@@ -231,11 +231,11 @@
                         border-radius:10px;
                     ">
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <span class="dashboard-number">
-            {{ $slot['booked'] }}/9
+            {{ $slot['booked'] }}
         </span>
     </div>
         @empty
@@ -252,7 +252,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
-            <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
+            <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
                         width: {{ ($slot['booked'] / 9) * 100 }}%;
@@ -261,11 +261,11 @@
                         border-radius:10px;
                     ">
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <span class="dashboard-number">
-            {{ $slot['booked'] }}/9
+            {{ $slot['booked'] }}
         </span>
     </div>
         @empty
@@ -282,7 +282,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
-            <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
+            <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
                         width: {{ ($slot['booked'] / 9) * 100 }}%;
@@ -291,11 +291,11 @@
                         border-radius:10px;
                     ">
                 </div>
-            </div>
+            </div> -->
         </div>
 
         <span class="dashboard-number">
-            {{ $slot['booked'] }}/9
+            {{ $slot['booked'] }}
         </span>
     </div>
         @empty

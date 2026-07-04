@@ -37,3 +37,6 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::get('/visitation-schedules', [VisitationScheduleController::class, 'list']);
     Route::post('/survey', [SurveyController::class, 'create']);
 });
+
+Route::get('visitation-schedule/export', [App\Http\Controllers\Twill\VisitationScheduleController::class, 'export'])
+    ->name('twill.visitationSchedules.export');
