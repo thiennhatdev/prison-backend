@@ -28,6 +28,7 @@ use App\Models\VisitationSchedule;
 use App\Enums\PtEnum;
 use App\Enums\VisitGroupEnum;
 use App\Enums\ChildVisitGroupEnum;
+use App\Enums\RelationshipEnum;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -98,14 +99,7 @@ class VisitationScheduleController extends BaseModuleController
                         ->name('relationship')
                         ->label('Mối quan hệ')
                         ->options(
-                            Options::make([
-                                Option::make('FATHER', 'Bố'),
-                                Option::make('MOTHER', 'Mẹ'),
-                                Option::make('WIFE', 'Vợ'),
-                                Option::make('HUSBAND', 'Chồng'),
-                                Option::make('CHILD', 'Con'),
-                                Option::make('NURTURER', 'Người nuôi dưỡng'),
-                            ])
+                            Options::make(RelationshipEnum::twillOptions())
                         )
                     
                 ]) 
