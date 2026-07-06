@@ -109,6 +109,12 @@ class VisitationScheduleController extends BaseModuleController
         );
 
         $form->add(
+            Input::make()
+            ->name('prisoner_address')
+            ->label('Địa chỉ phạm nhân')
+        );
+
+        $form->add(
             Select::make()
                 ->name('pt')
                 ->label('Trại tạm giam')
@@ -300,6 +306,12 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
                 ->field('prisoner_birthday')
                 ->title('Năm sinh')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('prisoner_address')
+                ->title('Địa chỉ')
         );
 
         $columns->add(

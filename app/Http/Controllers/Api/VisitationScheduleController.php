@@ -19,6 +19,7 @@ class VisitationScheduleController extends Controller
         $validator = Validator::make($request->all(), [
             'prisoner_name' => 'required',
             'prisoner_birthday' => 'required',
+            'prisoner_address' => 'required',
             'pt' => 'required',
             'visitDate' => 'required|date',
             'visitTime' => ['required', 'date_format:H:i'],
@@ -79,6 +80,9 @@ class VisitationScheduleController extends Controller
                     ->where('title', $request->prisoner_name);
             })
             ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
+            ->where('prisoner_sex', $request->prisoner_sex)
+            ->whereDate('prisoner_birthday', $request->prisoner_birthday)
+            ->where('prisoner_address', $request->prisoner_address)
             ->whereYear('visitDate', $visitDate->year)
             ->whereMonth('visitDate', $visitDate->month)
             ->exists();
@@ -120,6 +124,7 @@ class VisitationScheduleController extends Controller
                 'prisoner_name' => $request->prisoner_name,
                 'prisoner_sex' => $request->prisoner_sex,
                 'prisoner_birthday' => $request->prisoner_birthday,
+                'prisoner_address' => $request->prisoner_address,
                 'relatives' => $request->relatives,
                 'customer_id' => $request->user()->id,
             ]);

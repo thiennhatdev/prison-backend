@@ -42,6 +42,7 @@ class VisitationSchedule extends Model implements Sortable
         'prisoner_name',
         'prisoner_birthday',
         'prisoner_sex',
+        'prisoner_address',
         'refuse',
         'reason'
     ];
