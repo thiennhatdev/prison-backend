@@ -28,6 +28,7 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
                     'status' => [
                         'NOT_YET' => 'Sắp tới',
                         'DONE' => 'Đã thăm',
+                        'EXPIRED' => 'Hết hạn',
                     ][$item->status] ?? $item->status,
                     'prisoner_name' => $item->prisoner_name,
                     'prisoner_sex' => [
@@ -35,7 +36,6 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
                         'FEMALE' => 'Nữ',
                     ][$item->prisoner_sex] ?? $item->prisoner_sex,
                     'prisoner_birthday' => $item->prisoner_birthday,
-                    'prisoner_address' => $item->prisoner_address,
                     'pt' => $item->pt?->label(),
                     'customer' => $item->customer?->name,
                     'username' => collect($item->relatives)
@@ -66,7 +66,6 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
             'Phạm nhân',
             'Giới tính',
             'Năm sinh',
-            'Địa chỉ',
             'Phân trại',
             'Thân nhân đăng ký',
             'Người thân thích',

@@ -57,67 +57,11 @@ class VisitationScheduleController extends BaseModuleController
         $form = parent::getForm($model);
 
         $form->add(
-            Input::make()
-            ->name('prisoner_name')
-            ->label('Tên phạm nhân')
-        );
-        $form->add(
-            Input::make()
-            ->name('prisoner_address')
-            ->label('Địa chỉ phạm nhân')
-        );
-        $form->add(
-            Input::make()
-            ->name('prisoner_birthday')
-            ->label('Năm sinh phạm nhân')
-        );
-        $form->add(
-            Select::make()
-                ->name('prisoner_sex')
-                ->label('Giới tính')
-                ->options([
-                    ['value' => 'MALE', 'label' => 'Nam'],
-                    ['value' => 'FEMALE', 'label' => 'Nữ'],
-                ])
-        ) ;
-
-        $prisoners = app()->make(PrisonerRepository::class)->listAll();
- 
-        $arrPrisoner= [];
-        foreach ($prisoners->toArray() as $key => $value) {
-            array_push($arrPrisoner, Option::make($key, $value));
-        }
-
-        $form->add(
-            InlineRepeater::make()->name('relatives')->label("thân nhân")
-                ->fields([
-                    Input::make()->name('cccd')->label('CCCD/CMND'),
-                    Input::make()->name('username')->label('Họ tên'),
-                    Input::make()->name('phone')->label('Số điện thoại'),
-                    Input::make()->name('address')->label('Địa chỉ'),
-                    Select::make()
-                        ->name('relationship')
-                        ->label('Mối quan hệ')
-                        ->options(
-                            Options::make(RelationshipEnum::twillOptions())
-                        )
-                    
-                ]) 
-        );
-        
-        $form->add(
-            DatePicker::make()
-            ->name('visitDate')
-            ->withoutTime()
-            ->altFormat('d/m/Y')
-            ->label('Ngày')
-        );
-
-        $form->add(
             DatePicker::make()
                 ->name('visitTime')
                 ->timeOnly()
                 ->time24Hr()
+                ->minuteIncrement(5)
                 ->altFormat('H:i')
                 ->label('Giờ bắt đầu')
 
@@ -131,6 +75,51 @@ class VisitationScheduleController extends BaseModuleController
                 ->altFormat('H:i')
                 ->label('Giờ kết thúc')
 
+        );
+
+        $form->add(
+            DatePicker::make()
+            ->name('visitDate')
+            ->withoutTime()
+            ->altFormat('d/m/Y')
+            ->label('Ngày')
+        );
+
+        $form->add(
+            Input::make()
+            ->name('prisoner_name')
+            ->label('Tên phạm nhân')
+        );
+
+        $form->add(
+            Select::make()
+                ->name('prisoner_sex')
+                ->label('Giới tính')
+                ->options([
+                    ['value' => 'MALE', 'label' => 'Nam'],
+                    ['value' => 'FEMALE', 'label' => 'Nữ'],
+                ])
+        ) ;
+
+        
+        $form->add(
+            Input::make()
+            ->name('prisoner_birthday')
+            ->label('Năm sinh phạm nhân')
+        );
+
+        $form->add(
+            Select::make()
+                ->name('pt')
+                ->label('Trại tạm giam')
+                ->options(PtEnum::options())
+        );
+
+        $form->add(
+            Input::make()
+            ->type('number')
+            ->name('count')
+            ->label('Số người thăm')
         );
 
         $form->add(
@@ -153,19 +142,30 @@ class VisitationScheduleController extends BaseModuleController
             ->label('Tên cơ quan, tổ chức hoặc mối quan hệ')
         );
 
+        
+
+        $prisoners = app()->make(PrisonerRepository::class)->listAll();
+ 
+        $arrPrisoner= [];
+        foreach ($prisoners->toArray() as $key => $value) {
+            array_push($arrPrisoner, Option::make($key, $value));
+        }
 
         $form->add(
-            Select::make()
-                ->name('pt')
-                ->label('Thuộc phân trại')
-                ->options(PtEnum::options())
-        );
-
-        $form->add(
-            Input::make()
-            ->type('number')
-            ->name('count')
-            ->label('Số người thăm')
+            InlineRepeater::make()->name('relatives')->label("Người thăm")
+                ->fields([
+                    Input::make()->name('cccd')->label('CCCD/CMND'),
+                    Input::make()->name('username')->label('Họ tên'),
+                    Input::make()->name('phone')->label('Số điện thoại'),
+                    Input::make()->name('address')->label('Địa chỉ'),
+                    Select::make()
+                        ->name('relationship')
+                        ->label('Mối quan hệ')
+                        ->options(
+                            Options::make(RelationshipEnum::twillOptions())
+                        )
+                    
+                ]) 
         );
 
          $form->add(
@@ -181,6 +181,7 @@ class VisitationScheduleController extends BaseModuleController
                 ->options([
                     ['value' => 'DONE', 'label' => 'Đã thăm'],
                     ['value' => 'NOT_YET', 'label' => 'Sắp tới'],
+                    ['value' => 'EXPIRED', 'label' => 'Hết hạn'],
                 ])
         ) ;
 
@@ -303,12 +304,6 @@ class VisitationScheduleController extends BaseModuleController
 
         $columns->add(
             Text::make()
-                ->field('prisoner_address')
-                ->title('Địa chỉ')
-        );
-
-        $columns->add(
-            Text::make()
                 ->field('count')
                 ->title('Số lượng thăm')
         );
@@ -382,6 +377,7 @@ class VisitationScheduleController extends BaseModuleController
                 'refused' => 'Đã từ chối',
                 'done' => 'Đã thăm',
                 'not_yet' => 'Sắp tới',
+                'expired' => 'Hết hạn',
             ]))
             ->apply(function ($query, $value) {
                 switch ($value) {
@@ -400,6 +396,13 @@ class VisitationScheduleController extends BaseModuleController
 
                     case 'not_yet':
                         $query->where('status', 'NOT_YET')
+                              ->where(function ($q) {
+                                  $q->whereNull('refuse')
+                                    ->orWhere('refuse', '');
+                              });
+                        break;
+                    case 'expired':
+                        $query->where('status', 'EXPIRED')
                               ->where(function ($q) {
                                   $q->whereNull('refuse')
                                     ->orWhere('refuse', '');

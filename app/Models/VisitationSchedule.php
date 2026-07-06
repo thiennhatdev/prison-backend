@@ -41,7 +41,6 @@ class VisitationSchedule extends Model implements Sortable
         'identification',
         'prisoner_name',
         'prisoner_birthday',
-        'prisoner_address',
         'prisoner_sex',
         'refuse',
         'reason'
@@ -86,6 +85,7 @@ class VisitationSchedule extends Model implements Sortable
         return match ($this->status) {
             'DONE' => 'Đã thăm',
             'NOT_YET' => 'Sắp tới',
+            'EXPIRED' => 'Hết hạn',
             default => 'Không xác định',
         };
     }
