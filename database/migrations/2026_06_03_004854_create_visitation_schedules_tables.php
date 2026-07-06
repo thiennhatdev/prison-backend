@@ -4,6 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Prisoner;
+use App\Enums\PtEnum;
 
 return new class extends Migration
 {
@@ -25,17 +26,10 @@ return new class extends Migration
             $table->time('visitEndTime')->nullable();
             $table->string('qr_token', 200)->nullable();
             $table->string('status', 200)->default('NOT_YET');
-            $table->enum('pt', [
-                'PT1',
-                'PT2',
-                'PT3',
-                'PT4',
-                'PT5',
-                'PT6',
-                'PT7',
-                'PT8',
-                'PT_FEMALE',
-            ])->nullable();
+            $table->enum(
+                'pt',
+                array_column(PtEnum::cases(), 'value')
+            )->nullable();
             $table->enum('visitGroup', [
                 'INDIVIDUAL',
                 'ORGANIZATION',

@@ -9,7 +9,7 @@ return [
         'module' => true,
     ],
     'visitationSchedule' => [
-        'title' => 'Lịch thăm hỏi',
+        'title' => 'Lịch thăm gặp',
         'module' => true,
     ],
     'customers' => [

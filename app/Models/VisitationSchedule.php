@@ -89,5 +89,38 @@ class VisitationSchedule extends Model implements Sortable
             default => 'Không xác định',
         };
     }
+
+    public function getVisitWeekdayLabelAttribute(): string
+    {
+        $days = [
+            'Chủ nhật',
+            'Thứ Hai',
+            'Thứ Ba',
+            'Thứ Tư',
+            'Thứ Năm',
+            'Thứ Sáu',
+            'Thứ Bảy',
+        ];
+
+        return $days[Carbon::parse($this->visitDate)->dayOfWeek];
+    }
+
+    public function getPtLabelAttribute(): string
+    {
+        return $this->pt?->label() ?? '';
+    }
+
+    public function getPrisonerSexLabelAttribute(): string
+    {
+        return [
+            'MALE' => 'Nam',
+            'FEMALE' => 'Nữ',
+        ][$this->prisoner_sex] ?? '';
+    }
+
+    public function getVisitGroupLabelAttribute(): string
+    {
+        return $this->visitGroup?->label() ?? '';
+    }
     
 }

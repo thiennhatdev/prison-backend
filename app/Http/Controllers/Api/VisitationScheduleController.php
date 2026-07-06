@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Str;
+use App\Enums\VisitGroupEnum;
 
 class VisitationScheduleController extends Controller
 {
@@ -77,11 +78,14 @@ class VisitationScheduleController extends Controller
                 $query->where('locale', 'en')
                     ->where('title', $request->prisoner_name);
             })
+            ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
             ->whereYear('visitDate', $visitDate->year)
             ->whereMonth('visitDate', $visitDate->month)
             ->exists();
 
-        if ($exists) {
+        if ($exists 
+            && $request->visitGroup === VisitGroupEnum::INDIVIDUAL->value
+        ) {
             return response()->json([
                 'success' => false,
                 'message' => 'Phạm nhân này đã có lịch thăm trong tháng'

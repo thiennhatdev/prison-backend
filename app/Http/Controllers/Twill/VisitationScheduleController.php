@@ -127,6 +127,7 @@ class VisitationScheduleController extends BaseModuleController
                 ->name('visitEndTime')
                 ->timeOnly()
                 ->time24Hr()
+                ->minuteIncrement(5)
                 ->altFormat('H:i')
                 ->label('Giờ kết thúc')
 
@@ -175,6 +176,31 @@ class VisitationScheduleController extends BaseModuleController
 
         $form->add(
             Select::make()
+                ->name('status')
+                ->label('Trạng thái')
+                ->options([
+                    ['value' => 'DONE', 'label' => 'Đã thăm'],
+                    ['value' => 'NOT_YET', 'label' => 'Sắp tới'],
+                ])
+        ) ;
+
+        $form->add(
+            Select::make()
+                ->name('refuse')
+                ->label('Lý do từ chối')
+                ->options([
+                    ['value' => 'Sai thông tin phạm nhân', 'label' => 'Sai thông tin phạm nhân'],
+                    ['value' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
+                    ['value' => 'Trùng thời gian thăm gặp', 'label' => 'Trùng thời gian thăm gặp'],
+                    ['value' => 'Lý do khác', 'label' => 'Lý do khác'],
+                    ['value' => 'Lịch đã có người đăng ký trước bạn. Xin vui lòng chọn thời gian khác', 'label' => 'Lịch đã có người đăng ký trước bạn. Xin vui lòng chọn thời gian khác'],
+                    ['value' => '', 'label' => 'TRỐNG'],
+                ])
+                ->note("* Lưu ý: Trường này để trống thì lịch thăm mới không bị từ chối")
+        ) ;
+
+        $form->add(
+            Select::make()
             ->name('prisoner_id')
             ->label('Gắn phạm nhân')
             ->options(
@@ -197,30 +223,6 @@ class VisitationScheduleController extends BaseModuleController
                     ->toArray()
             )
         );
-
-        $form->add(
-            Select::make()
-                ->name('status')
-                ->label('Trạng thái')
-                ->options([
-                    ['value' => 'DONE', 'label' => 'Đã thăm'],
-                    ['value' => 'NOT_YET', 'label' => 'Sắp tới'],
-                ])
-        ) ;
-
-        $form->add(
-            Select::make()
-                ->name('refuse')
-                ->label('Lý do từ chối')
-                ->options([
-                    ['value' => 'Sai thông tin phạm nhân', 'label' => 'Sai thông tin phạm nhân'],
-                    ['value' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp', 'label' => 'Phạm nhân bị cơ quan tố tụng cấm thăm gặp'],
-                    ['value' => 'Trùng thời gian thăm gặp', 'label' => 'Trùng thời gian thăm gặp'],
-                    ['value' => 'Lý do khác', 'label' => 'Lý do khác'],
-                    ['value' => '', 'label' => 'TRỐNG'],
-                ])
-                ->note("* Lưu ý: Trường này để trống thì lịch thăm mới không bị từ chối")
-        ) ;
 
         return $form;
     }
@@ -263,10 +265,58 @@ class VisitationScheduleController extends BaseModuleController
 
         $columns->add(
             Text::make()
+                ->field('visit_time_label')
+                ->title('Giờ thăm')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('visitDate')
+                ->title('Ngày thăm')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('visit_weekday_label')
+                ->title('Thứ')
+        );
+
+        $columns->add(
+            Text::make()
                 ->field('title')
                 ->title('Tên phạm nhân')
                 ->sortable()
                 ->linkToEdit()
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('prisoner_sex_label')
+                ->title('Giới tính')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('prisoner_birthday')
+                ->title('Năm sinh')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('prisoner_address')
+                ->title('Địa chỉ')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('count')
+                ->title('Số lượng thăm')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('visit_group_label')
+                ->title('Diện thăm gặp')
         );
 
         $columns->add(
@@ -279,18 +329,6 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
                 ->field('refuse')
                 ->title('Lý do từ chối')
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('visitDate')
-                ->title('Ngày thăm')
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('visit_time_label')
-                ->title('Giờ thăm')
         );
 
         return $columns;

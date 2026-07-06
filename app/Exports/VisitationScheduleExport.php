@@ -23,8 +23,8 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
         return $this->items->map(function ($item, $index) {
                 return [
                     'stt' => $index + 1,
-                    'visitDate' =>\Carbon\Carbon::parse($item->visitDate)->format('d/m/Y'),
                     'visitTime' => \Carbon\Carbon::parse($item->visitTime)->format('H:i'),
+                    'visitDate' =>\Carbon\Carbon::parse($item->visitDate)->format('d/m/Y'),
                     'status' => [
                         'NOT_YET' => 'Sắp tới',
                         'DONE' => 'Đã thăm',
@@ -34,13 +34,14 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
                         'MALE' => 'Nam',
                         'FEMALE' => 'Nữ',
                     ][$item->prisoner_sex] ?? $item->prisoner_sex,
+                    'prisoner_birthday' => $item->prisoner_birthday,
+                    'prisoner_address' => $item->prisoner_address,
                     'pt' => $item->pt?->label(),
                     'customer' => $item->customer?->name,
                     'username' => collect($item->relatives)
                         ->pluck('username')
                         ->implode(', '),
                     'identification' => $item->identification,
-                    'count' => $item->count,
                     'cccd' => collect($item->relatives)
                         ->pluck('cccd')
                         ->implode(', '),
@@ -50,6 +51,7 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
                     'address' => collect($item->relatives)
                         ->pluck('address')
                         ->implode(', '),
+                    'count' => $item->count,
                     ];
             });
     }
@@ -58,20 +60,21 @@ class VisitationScheduleExport implements FromCollection, WithHeadings
     {
         return [
             'STT',
-            'Ngày thăm',
             'Giờ thăm',
+            'Ngày thăm',
             'Trạng thái',
             'Phạm nhân',
             'Giới tính',
+            'Năm sinh',
+            'Địa chỉ',
             'Phân trại',
             'Thân nhân đăng ký',
             'Người thân thích',
             'Đại diện cơ quan, tổ chức, cá nhân khác',
-            'Số lượng',
             'Số CCCD',
             'Số điện thoại',
             'Địa chỉ',
-            
+            'Số lượng thăm',
         ];
     }
 }
