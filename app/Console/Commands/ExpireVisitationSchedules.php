@@ -14,7 +14,7 @@ class ExpireVisitationSchedules extends Command
      *
      * @var string
      */
-    protected $signature = 'app:expire-visitation-schedules';
+    protected $signature = 'visitation:expire';
 
     /**
      * The console command description.
