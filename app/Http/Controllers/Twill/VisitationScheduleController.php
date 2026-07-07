@@ -310,8 +310,8 @@ class VisitationScheduleController extends BaseModuleController
 
         $columns->add(
             Text::make()
-                ->field('prisoner_address')
-                ->title('Địa chỉ')
+                ->field('pt_label')
+                ->title('Nơi quản lý')
         );
 
         $columns->add(
