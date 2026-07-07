@@ -70,21 +70,33 @@
 
 .dashboard-grid{
     display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-    gap:20px;
-    padding:10px 30px;
+    grid-template-columns:repeat(3, 1fr);
+    gap:24px;
+    padding:20px 30px;
 }
 
 .dashboard-card{
     background:#fff;
-    border-radius:12px;
-    padding:20px;
-    box-shadow:0 2px 12px rgba(0,0,0,.08);
+    border-radius:18px;
+    padding:22px;
+    border:1px solid #edf0f5;
+    box-shadow:0 10px 25px rgba(15,23,42,.06);
+    transition:.25s;
+}
+
+.dashboard-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 18px 40px rgba(15,23,42,.12);
 }
 
 .dashboard-card h3{
-    margin:0 0 15px;
+    margin:0 0 18px;
     font-size:18px;
+    font-weight:700;
+    color:#1f2937;
+    display:flex;
+    align-items:center;
+    gap:8px;
 }
 
 .dashboard-item{
@@ -212,9 +224,8 @@
 
 @endpush
 
-
-
 <div class="container dashboard-grid">
+    <div class="">
     <div class="dashboard-card ">
         <h3>🕒 Khung giờ đặt hôm nay</h3>
 
@@ -244,7 +255,8 @@
     </div>
 </div>
 
-<div class="container dashboard-grid">
+
+<div class="">
     <div class="dashboard-card ">
         <h3>🕒 Khung giờ đặt Ngày mai</h3>
 
@@ -274,7 +286,7 @@
     </div>
 </div>
 
-<div class="container dashboard-grid">
+<div class="">
     <div class="dashboard-card ">
         <h3>🕒 Khung giờ đặt Ngày kia</h3>
 
@@ -302,6 +314,7 @@
             <p>Chưa có lịch đặt Ngày kia</p>
         @endforelse
     </div>
+</div>
 </div>
 
 
