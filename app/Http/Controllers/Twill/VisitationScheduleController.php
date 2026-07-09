@@ -266,15 +266,15 @@ class VisitationScheduleController extends BaseModuleController
 
         $columns->add(
             Text::make()
-            ->field('status_badge')
-            ->title('Trạng thái')
-            ->renderHtml()
+                ->field('stt')
+                ->title('STT')
         );
 
         $columns->add(
             Text::make()
-                ->field('stt')
-                ->title('STT')
+            ->field('status_badge')
+            ->title('Trạng thái')
+            ->renderHtml()
         );
 
         $columns->add(
