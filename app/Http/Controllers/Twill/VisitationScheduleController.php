@@ -257,11 +257,18 @@ class VisitationScheduleController extends BaseModuleController
     {
         $columns = TableColumns::make();
 
+        // $columns->add(
+        //     PublishStatus::make()
+        //         ->title('Published')
+        //         ->sortable()
+        //         ->optional()
+        // );
+
         $columns->add(
-            PublishStatus::make()
-                ->title('Published')
-                ->sortable()
-                ->optional()
+            Text::make()
+            ->field('status_badge')
+            ->title('Trạng thái')
+            ->renderHtml()
         );
 
         $columns->add(
@@ -324,12 +331,6 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
                 ->field('visit_group_label')
                 ->title('Diện thăm gặp')
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('status_label')
-                ->title('Trạng thái')
         );
 
         $columns->add(

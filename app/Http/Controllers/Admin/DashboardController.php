@@ -20,16 +20,21 @@ class DashboardController extends Controller
         ->whereDate('visitDate', $date)
         ->select(
             'visitTime',
+            'visitEndTime',
             DB::raw('COUNT(*) as booked_count')
         )
-        ->groupBy('visitTime')
+        ->groupBy('visitTime', 'visitEndTime')
         ->orderBy('visitTime')
+        ->orderBy('visitEndTime')
         ->get()
         ->map(function ($item) {
             return [
                 'time' => Carbon::parse($item->visitTime)->format('H:i'),
+                'endTime' => $item->visitEndTime
+                    ? Carbon::parse($item->visitEndTime)->format('H:i')
+                    : null,
                 'booked' => $item->booked_count,
-                'available' => 9 - $item->booked_count,
+                'available' => max(0, 9 - $item->booked_count),
                 'total' => 9,
             ];
         });

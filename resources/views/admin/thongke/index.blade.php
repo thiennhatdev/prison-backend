@@ -233,6 +233,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
+            <strong>- {{ $slot['endTime'] }}</strong>
             <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
@@ -264,6 +265,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
+            <strong>- {{ $slot['endTime'] }}</strong>
             <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
@@ -294,6 +296,7 @@
             <div class="dashboard-item">
         <div>
             <strong>{{ $slot['time'] }}</strong>
+            <strong>- {{ $slot['endTime'] }}</strong>
             <!-- <div style="width:180px;height:8px;background:#eee;border-radius:10px;margin-top:5px;">
                 <div
                     style="
@@ -419,13 +422,13 @@
             </span>
         </div>
         <div class="dashboard-item">
-            <span>Tổng lịch đã duyệt</span>
+            <span>Tổng lịch đã duyệt (phê duyệt được thăm gặp):</span>
             <span class="dashboard-number">
                 {{ $totalSchedulesPublish }}
             </span>
         </div>
         <div class="dashboard-item">
-            <span>Tổng lịch chưa duyệt</span>
+            <span>Tổng lịch chưa duyệt (phê duyệt từ chối)</span>
             <span class="dashboard-number">
                 {{ $totalSchedulesDraft }}
             </span>

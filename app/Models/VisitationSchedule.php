@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Enums\PtEnum;
 use App\Enums\VisitGroupEnum;
 use App\Enums\ChildVisitGroupEnum;
+use App\Enums\VisitationScheduleStatusEnum;
 
 class VisitationSchedule extends Model implements Sortable
 {
@@ -92,6 +93,27 @@ class VisitationSchedule extends Model implements Sortable
             'NOT_YET' => 'Sắp tới',
             'EXPIRED' => 'Hết hạn',
             default => 'Không xác định',
+        };
+    }
+
+    public function getStatusBadgeAttribute(): string
+    {
+        if (!empty($this->refuse)) {
+            return '<span style="padding:4px 10px;border-radius:999px;background:#FEE2E2;color:#B91C1C;font-weight:600">Từ chối</span>';
+        }
+
+        return match ($this->status) {
+            VisitationScheduleStatusEnum::NOT_YET->value =>
+                '<span style="padding:4px 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-weight:600">Sắp tới</span>',
+
+            VisitationScheduleStatusEnum::DONE->value =>
+                '<span style="padding:4px 10px;border-radius:999px;background:#DCFCE7;color:#166534;font-weight:600">Đã thăm</span>',
+
+            VisitationScheduleStatusEnum::EXPIRED->value =>
+                '<span style="padding:4px 10px;border-radius:999px;background:#ccc;color:#666;font-weight:600">Hết hạn</span>',
+
+            default =>
+                '<span style="padding:4px 10px;border-radius:999px;background:#E5E7EB;color:#374151;font-weight:600">Không xác định</span>',
         };
     }
 
