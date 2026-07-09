@@ -130,6 +130,31 @@
     border-bottom:1px solid #eee;
 }
 
+.report-header-title {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.btn-export{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 16px;
+    background:#16a34a;
+    color:#fff;
+    border-radius:6px;
+    text-decoration:none;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.btn-export:hover{
+    background:#15803d;
+    color:#fff;
+}
+
 .report-header h3{
     margin:0;
     font-size:18px;
@@ -321,13 +346,13 @@
 </div>
 
 
-<form method="GET" class="dashboard-filter container">
+<form method="GET" class="dashboard-filter container" id="filterForm">
     <div>
         <label>Tên phạm nhân</label>
         <input
             type="text"
-            name="prisoner_name"
-            value="{{ $prisonerName }}"
+            name="search"
+            value="{{ $search }}"
             placeholder="Nhập tên phạm nhân"
             class="input-search-name"
         >
@@ -469,11 +494,24 @@
 </div>
 @if($hasFilter)
 <div class="container" style="padding: 10px 30px">
-    <div class="report-card ">
+    <div class="report-card">
 
         <div class="report-header">
-            <h3>Kết quả tìm kiếm</h3>
-            <span>{{ $prisoners->count() }} bản ghi</span>
+            <div class="report-header-title">
+                <h3>Kết quả tìm kiếm</h3>
+                <span>{{ $prisoners->count() }} bản ghi</span>
+            </div>
+
+            <a href="{{ route('twill.visitationSchedules.export', [
+    'filter' => json_encode([
+            'search' => request('search'),
+            'from_date' => request('from_date'),
+            'to_date' => request('to_date'),
+        ])
+    ]) }}"
+            class="btn-export">
+                <i class="fas fa-file-excel"></i> Xuất Excel
+            </a>
         </div>
 
         @if($prisoners->isEmpty())
@@ -485,41 +523,80 @@
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th>Phạm nhân</th>
-                            <th>Ngày giờ</th>
-                            <th>Thân nhân</th>
-                            <th>Quan hệ</th>
-                            <th>Số người thăm</th>
+                            <th>STT</th>
                             <th>Trạng thái</th>
+                            <th>Giờ thăm</th>
+                            <th>Ngày thăm</th>
+                            <th>Thứ</th>
+                            <th>Giới tính</th>
+                            <th>Năm sinh</th>
+                            <th>Nơi quản lý</th>
+                            <th>Số lượng thăm</th>
+                            <th>Diện thăm gặp</th>
+                            <th>Lý do từ chối</th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        @foreach($prisoners as $prisoner)
+                        @foreach($prisoners as $index => $prisoner)
                             <tr>
-                                <td>{{ $prisoner->prisoner_name }}</td>
+                                {{-- STT --}}
+                                <td>{{ $index + 1 }}</td>
 
-                                <td>
-                                    {{ \Carbon\Carbon::parse($prisoner->visitDate)->format('d/m/Y') }}
-                                    <br>
-                                    <small>{{ \Carbon\Carbon::parse($prisoner->visitTime)->format('H:i') }}</small>
-                                </td>
-
-                                <td>{{ $prisoner->relatives[0]['username'] }}</td>
-
-                                <td>{{ \App\Enums\RelationshipEnum::labelOf($prisoner->relatives[0]['relationship'] ?? null) }}</td>
-
-                                <td>{{ $prisoner->count }}</td>
-
+                                {{-- Trạng thái --}}
                                 <td>
                                     <span class="status-badge
-                                        @if($prisoner->status_label == 'Đã thăm') badge-success
-                                        @elseif($prisoner->status_label == 'Từ chối') badge-danger
-                                        @else badge-warning
+                                        @if($prisoner->status_label == 'Đã thăm')
+                                            badge-success
+                                        @elseif($prisoner->status_label == 'Từ chối')
+                                            badge-danger
+                                        @else
+                                            badge-warning
                                         @endif">
                                         {{ $prisoner->status_label }}
                                     </span>
                                 </td>
+
+                                {{-- Giờ thăm --}}
+                                <td>
+                                    {{ \Carbon\Carbon::parse($prisoner->visitTime)->format('H:i') }}
+                                     - {{ \Carbon\Carbon::parse($prisoner->visitEndTime)->format('H:i') }}
+                                </td>
+
+                                {{-- Ngày thăm --}}
+                                <td>
+                                    {{ \Carbon\Carbon::parse($prisoner->visitDate)->format('d/m/Y') }}
+                                </td>
+
+                                {{-- Thứ --}}
+                                <td>
+                                    {{ \Carbon\Carbon::parse($prisoner->visitDate)->locale('vi')->translatedFormat('l') }}
+                                </td>
+
+                                {{-- Giới tính --}}
+                                <td>
+                                    {{
+                                        [
+                                            'MALE' => 'Nam',
+                                            'FEMALE' => 'Nữ',
+                                        ][$prisoner->prisoner_sex] ?? '-'
+                                    }}
+                                </td>
+
+                                {{-- Năm sinh --}}
+                                <td>{{ $prisoner->prisoner_birthday ?? '-' }}</td>
+
+                                {{-- Nơi quản lý --}}
+                                <td>{{ $prisoner->pt?->label() ?: '-' }}</td>
+
+                                {{-- Số lượng thăm --}}
+                                <td>{{ $prisoner->count }}</td>
+
+                                {{-- Diện thăm gặp --}}
+                                <td>{{ $prisoner->visit_group_label ?? '-' }}</td>
+
+                                {{-- Lý do từ chối --}}
+                                <td>{{ $prisoner->refuse ?? '-' }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -531,4 +608,12 @@
 </div>
 @endif
 
+
+
 @endsection
+
+@push('extra_js')
+<script>
+
+</script>
+@endpush

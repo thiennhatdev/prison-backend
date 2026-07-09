@@ -257,17 +257,17 @@ class VisitationScheduleController extends BaseModuleController
     {
         $columns = TableColumns::make();
 
-        // $columns->add(
-        //     PublishStatus::make()
-        //         ->title('Published')
-        //         ->sortable()
-        //         ->optional()
-        // );
-
         $columns->add(
             Text::make()
                 ->field('stt')
                 ->title('STT')
+        );
+
+        $columns->add(
+            PublishStatus::make()
+                ->title('Published')
+                ->sortable()
+                ->optional()
         );
 
         $columns->add(
@@ -442,11 +442,13 @@ class VisitationScheduleController extends BaseModuleController
 
     public function export(Request $request)
 {
+
     $query = VisitationSchedule::query()->with('customer');
     $filters = json_decode($request->get('filter', '{}'), true);
 
     $dateFilter = $filters['date_filter'] ?? null;
     $statusFilter = $filters['status_filter'] ?? null;
+    $search = trim($filters['search'] ?? '');
 
     switch ($statusFilter) {
         case 'refused':
@@ -495,6 +497,10 @@ class VisitationScheduleController extends BaseModuleController
             $query->whereYear('visitDate', now()->year)
                   ->whereMonth('visitDate', now()->month);
             break;
+    }
+
+    if (!empty($search)) {
+        $query->where('prisoner_name', 'like', "%{$search}%");
     }
 
     return Excel::download(
