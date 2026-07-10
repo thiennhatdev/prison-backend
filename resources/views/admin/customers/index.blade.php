@@ -141,6 +141,8 @@
                         <th>ID</th>
                         <th>Zalo ID</th>
                         <th>Họ tên</th>
+                        <th>Tổng lịch thăm</th>
+                        <th>Tổng lịch đã duyệt</th>
                         <th>Quyền</th>
                         <th>Trạng thái</th>
                         <th width="180">Thao tác</th>
@@ -162,6 +164,14 @@
 
                         <td>
                             {{ $customer->name }}
+                        </td>
+
+                        <td>
+                            {{ $customer->visitation_schedules_count }}
+                        </td>
+
+                        <td>
+                            {{ $customer->published_visitation_schedules_count }}
                         </td>
 
                          <td>

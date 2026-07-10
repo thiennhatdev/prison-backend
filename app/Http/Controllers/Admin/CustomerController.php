@@ -12,6 +12,12 @@ class CustomerController extends Controller
     {
 
          $customers = Customer::query()
+        ->withCount([
+            'visitationSchedules',
+            'visitationSchedules as published_visitation_schedules_count' => function ($query) {
+                $query->published();
+            },
+        ])
         ->when($request->filled('search'), function ($query) use ($request) {
             $search = $request->search;
 
@@ -24,7 +30,7 @@ class CustomerController extends Controller
         ->latest()
         ->paginate(20)
         ->withQueryString();
-
+        
     return view(
         'admin.customers.index',
         compact('customers')

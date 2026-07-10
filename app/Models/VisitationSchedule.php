@@ -64,11 +64,6 @@ class VisitationSchedule extends Model implements Sortable
         'childVisitGroup' => ChildVisitGroupEnum::class,
     ];
 
-    public function customer()
-        {
-            return $this->belongsTo(Customer::class);
-        }
-
     public function getVisitTimeLabelAttribute(): string
     {
         $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
@@ -99,21 +94,21 @@ class VisitationSchedule extends Model implements Sortable
     public function getStatusBadgeAttribute(): string
     {
         if (!empty($this->refuse)) {
-            return '<span style="padding:4px 10px;border-radius:999px;background:#FEE2E2;color:#B91C1C;font-weight:600">Từ chối</span>';
+            return '<span style="padding:4px 10px;border-radius:999px;background:#FEE2E2;color:#B91C1C;font-weight:600; text-align: center;">Từ chối</span>';
         }
 
         return match ($this->status) {
             VisitationScheduleStatusEnum::NOT_YET->value =>
-                '<span style="padding:4px 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-weight:600">Sắp tới</span>',
+                '<span style="padding:4px 10px;border-radius:999px;background:#FEF3C7;color:#92400E;font-weight:600; text-align: center;">Sắp tới</span>',
 
             VisitationScheduleStatusEnum::DONE->value =>
-                '<span style="padding:4px 10px;border-radius:999px;background:#DCFCE7;color:#166534;font-weight:600">Đã thăm</span>',
+                '<span style="padding:4px 10px;border-radius:999px;background:#DCFCE7;color:#166534;font-weight:600; text-align: center;">Đã thăm</span>',
 
             VisitationScheduleStatusEnum::EXPIRED->value =>
-                '<span style="padding:4px 10px;border-radius:999px;background:#ccc;color:#666;font-weight:600">Hết hạn</span>',
+                '<span style="padding:4px 10px;border-radius:999px;background:#ccc;color:#666;font-weight:600; text-align: center;">Hết hạn</span>',
 
             default =>
-                '<span style="padding:4px 10px;border-radius:999px;background:#E5E7EB;color:#374151;font-weight:600">Không xác định</span>',
+                '<span style="padding:4px 10px;border-radius:999px;background:#E5E7EB;color:#374151;font-weight:600; text-align: center;">Không xác định</span>',
         };
     }
 
@@ -148,6 +143,11 @@ class VisitationSchedule extends Model implements Sortable
     public function getVisitGroupLabelAttribute(): string
     {
         return $this->visitGroup?->label() ?? '';
+    }
+
+    public function customer()
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
     
 }
