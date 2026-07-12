@@ -23,12 +23,12 @@ class VisitationScheduleController extends Controller
             'pt' => 'required',
             'visitDate' => 'required|date',
             'visitTime' => ['required', 'date_format:H:i'],
-            'count' => 'required|integer|min:1|max:3',
+            'count' => 'required|integer|min:1|max:5',
             // 'prisoner_id' => 'required|integer|exists:prisoners,id'
         ], [
             'count.integer' => 'count phải là số',
             'count.min' => 'count tối thiểu là 1',
-            'count.max' => 'count tối đa là 3',
+            'count.max' => 'count tối đa là 5',
             'visitTime.date_format' => 'visitTime phải có định dạng HH:mm',
         ]);
 
