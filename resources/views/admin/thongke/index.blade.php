@@ -525,6 +525,7 @@
                         <tr>
                             <th>STT</th>
                             <th>Trạng thái</th>
+                            <th>Tên phạm nhân</th>
                             <th>Giờ thăm</th>
                             <th>Ngày thăm</th>
                             <th>Thứ</th>
@@ -556,6 +557,8 @@
                                         {{ $prisoner->status_label }}
                                     </span>
                                 </td>
+
+                                <td>{{ $prisoner->prisoner_name }}</td>
 
                                 {{-- Giờ thăm --}}
                                 <td>
