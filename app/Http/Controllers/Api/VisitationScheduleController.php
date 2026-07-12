@@ -77,7 +77,7 @@ class VisitationScheduleController extends Controller
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
         $exists = VisitationSchedule::whereHas('translations', function ($query) use ($request) {
                 $query->where('locale', 'en')
-                    ->where('title', $request->prisoner_name);
+                    ->whereRaw('LOWER(title) = ?', [mb_strtolower($request->prisoner_name)]);
             })
             ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
             ->where('prisoner_sex', $request->prisoner_sex)
