@@ -1,5 +1,6 @@
 @extends('twill::layouts.free')
 
+
 @push('extra_css')
 <style>
 .card {
@@ -57,6 +58,7 @@
     text-align: left;
     padding: 14px;
     border-bottom: 2px solid #e5e7eb;
+    white-space: nowrap;
 }
 
 .table-custom td {
@@ -133,6 +135,7 @@
                 </button>
 
             </form>
+<div style="overflow: auto;">
 
             <table class="table-custom">
 
@@ -143,6 +146,7 @@
                         <th>Họ tên</th>
                         <th>Tổng lịch thăm</th>
                         <th>Tổng lịch đã duyệt</th>
+                        <th>TB lịch/ngày</th>
                         <th>Quyền</th>
                         <th>Trạng thái</th>
                         <th width="180">Thao tác</th>
@@ -151,7 +155,11 @@
 
                 <tbody>
                 @foreach($customers as $customer)
-
+                    @php
+                        $average = $customer->active_days_count > 0
+                            ? round($customer->total_visits_count / $customer->active_days_count, 2)
+                            : 0;
+                    @endphp
                     <tr>
 
                         <td>
@@ -172,6 +180,12 @@
 
                         <td>
                             {{ $customer->published_visitation_schedules_count }}
+                        </td>
+
+                        <td>
+                            {{ $customer->active_days_count
+    ? round($customer->visitation_schedules_count/ $customer->active_days_count, 2)
+    : 0 }}
                         </td>
 
                          <td>
@@ -201,7 +215,7 @@
     </form>
 </td>
 
-<td>
+<td style="white-space: nowrap;">
     @if($customer->is_active)
         <span class="badge badge-success">
             Đang hoạt động
@@ -248,6 +262,7 @@
             </tbody>
 
         </table>
+</div>
 
         @if ($customers->hasPages())
 <div style="margin-top:20px; text-align: right">

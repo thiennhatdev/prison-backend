@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
+use App\Models\VisitationSchedule;
 
 class CustomerController extends Controller
 {
@@ -18,6 +19,13 @@ class CustomerController extends Controller
                 $query->published();
             },
         ])
+        ->selectSub(
+            VisitationSchedule::query()
+                ->selectRaw('COUNT(DISTINCT visitDate)')
+                ->whereColumn('customer_id', 'customers.id')
+                ,
+            'active_days_count'
+        )
         ->when($request->filled('search'), function ($query) use ($request) {
             $search = $request->search;
 
@@ -30,7 +38,7 @@ class CustomerController extends Controller
         ->latest()
         ->paginate(20)
         ->withQueryString();
-        
+
     return view(
         'admin.customers.index',
         compact('customers')
