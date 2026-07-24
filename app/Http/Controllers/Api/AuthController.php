@@ -8,6 +8,7 @@ use App\Models\Customer;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Http;
+use App\Models\Prisoner;
 
 class AuthController extends Controller
 {
@@ -108,6 +109,28 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
+        ]);
+    }
+
+    public function verifyPhone(Request $request)
+    {
+        $request->validate([
+            'phone_number' => ['required', 'string'],
+        ]);
+
+        $user = $request->user();
+
+        Customer::where('id', $user->id)->update([
+            'phone' => $request->phone_number,
+        ]);
+
+        $status = Prisoner::all()->contains(function ($prisoner) use ($request) {
+            return collect($prisoner->phones)
+                ->pluck('phone')
+                ->contains($request->phone_number);
+        });
+        return response()->json([
+            'status' => $status,
         ]);
     }
 }

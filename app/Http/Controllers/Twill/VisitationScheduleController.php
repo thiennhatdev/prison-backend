@@ -93,29 +93,6 @@ class VisitationScheduleController extends BaseModuleController
 
         $form->add(
             Select::make()
-                ->name('prisoner_sex')
-                ->label('Giới tính')
-                ->options([
-                    ['value' => 'MALE', 'label' => 'Nam'],
-                    ['value' => 'FEMALE', 'label' => 'Nữ'],
-                ])
-        ) ;
-
-        
-        $form->add(
-            Input::make()
-            ->name('prisoner_birthday')
-            ->label('Năm sinh phạm nhân')
-        );
-
-        $form->add(
-            Input::make()
-            ->name('prisoner_address')
-            ->label('Địa chỉ phạm nhân')
-        );
-
-        $form->add(
-            Select::make()
                 ->name('pt')
                 ->label('Trại tạm giam')
                 ->options(PtEnum::options())
@@ -205,6 +182,13 @@ class VisitationScheduleController extends BaseModuleController
                 ])
                 ->note("* Lưu ý: Trường này để trống thì lịch thăm mới không bị từ chối")
         ) ;
+
+        $form->add(
+            Input::make()
+                ->name('refuse_other')
+                ->label('Nhập lý do khác')
+                 ->note('Chỉ nhập khi chọn "Lý do khác" trong Lý do từ chối')
+        );
 
         $form->add(
             Select::make()
@@ -301,18 +285,6 @@ class VisitationScheduleController extends BaseModuleController
                 ->title('Tên phạm nhân')
                 ->sortable()
                 ->linkToEdit()
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('prisoner_sex_label')
-                ->title('Giới tính')
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('prisoner_birthday')
-                ->title('Năm sinh')
         );
 
         $columns->add(

@@ -464,6 +464,11 @@
                 {{ $totalSchedulesDone }}
             </span>
         </div>
+
+        <div class="dashboard-item">
+            <span>Đã có <strong>{{$totalVisitedPrisoners}}</strong> phạm nhân gặp <strong>{{$totalVisitedRelatives}}</strong> thân nhân </span>
+            
+        </div>
     </div>
 
     <div class="dashboard-card">

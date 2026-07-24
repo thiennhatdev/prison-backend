@@ -8,17 +8,22 @@ use A17\Twill\Repositories\Behaviors\HandleSlugs;
 use A17\Twill\Repositories\Behaviors\HandleMedias;
 use A17\Twill\Repositories\Behaviors\HandleFiles;
 use A17\Twill\Repositories\Behaviors\HandleRevisions;
+use A17\Twill\Repositories\Behaviors\HandleJsonRepeaters;
 use A17\Twill\Repositories\ModuleRepository;
 use App\Models\Prisoner;
 
 class PrisonerRepository extends ModuleRepository
 {
-    use HandleBlocks, HandleTranslations, HandleSlugs, HandleMedias, HandleFiles, HandleRevisions;
+    use HandleBlocks, HandleTranslations, HandleSlugs, HandleMedias, HandleFiles, HandleRevisions, HandleJsonRepeaters;
 
     public function __construct(Prisoner $model)
     {
         $this->model = $model;
     }
+
+    protected $jsonRepeaters = [
+        'phones',
+    ];
 
     public function prepareFieldsBeforeCreate(array $fields): array
     {

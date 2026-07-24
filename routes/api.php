@@ -25,17 +25,21 @@ Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
 
 
 Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
-    Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
     Route::get('/user/me', [AuthController::class, 'info']);
     Route::get('/posts', [PostController::class, 'list']);
     Route::get('/post/{id}', [PostController::class, 'detail']);
     Route::get('/prison-rules', [PrisonRuleController::class, 'list']);
     Route::get('/prison-rule/{id}', [PrisonRuleController::class, 'detail']);
-    Route::get('/surveys', [SurveyController::class, 'list']);
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
-    Route::get('/visit-nearest', [VisitationScheduleController::class, 'nearest']);
-    Route::get('/visitation-schedules', [VisitationScheduleController::class, 'list']);
     Route::post('/survey', [SurveyController::class, 'create']);
+    Route::post('/auth/verify-phone', [AuthController::class, 'verifyPhone']);
+    Route::get('/surveys', [SurveyController::class, 'list']);
+
+    Route::middleware('verify.phone')->group(function () {
+        Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
+        Route::get('/visitation-schedules', [VisitationScheduleController::class, 'list']);
+        Route::get('/visit-nearest', [VisitationScheduleController::class, 'nearest']);
+    });
 });
 
 Route::get('visitation-schedule/export', [App\Http\Controllers\Twill\VisitationScheduleController::class, 'export'])

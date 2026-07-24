@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         //
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
+            'verify.phone' => \App\Http\Middleware\VerifyCustomerPhone::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

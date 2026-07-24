@@ -144,6 +144,7 @@
                         <th>ID</th>
                         <th>Zalo ID</th>
                         <th>Họ tên</th>
+                        <th>SĐT</th>
                         <th>Tổng lịch thăm</th>
                         <th>Tổng lịch đã duyệt</th>
                         <th>TB lịch/ngày</th>
@@ -172,6 +173,10 @@
 
                         <td>
                             {{ $customer->name }}
+                        </td>
+
+                        <td>
+                            {{ $customer->phone }}
                         </td>
 
                         <td>

@@ -50,7 +50,7 @@ class DashboardController extends Controller
         $postQuery = Post::query();
         $customerQuery = Customer::query();
         $scheduleQuery = VisitationSchedule::query();
-        $scheduleQuery = VisitationSchedule::query();
+        $scheduleQuery2 = VisitationSchedule::query();
         $prisonRuleQuery = PrisonRule::query();
 
         $hasFilter = $request->filled('search')
@@ -85,6 +85,7 @@ class DashboardController extends Controller
             $postQuery->whereDate('created_at', '>=', $fromDate);
             $customerQuery->whereDate('created_at', '>=', $fromDate);
             $scheduleQuery->whereDate('created_at', '>=', $fromDate);
+            $scheduleQuery2->whereDate('visitDate', '>=', $fromDate);
             $prisonRuleQuery->whereDate('created_at', '>=', $fromDate);
         }
 
@@ -92,12 +93,27 @@ class DashboardController extends Controller
             $postQuery->whereDate('created_at', '<=', $toDate);
             $customerQuery->whereDate('created_at', '<=', $toDate);
             $scheduleQuery->whereDate('created_at', '<=', $toDate);
+            $scheduleQuery2->whereDate('visitDate', '<=', $toDate);
             $prisonRuleQuery->whereDate('created_at', '<=', $toDate);
         }
 
         $today = $this->getScheduleStats(now('Asia/Ho_Chi_Minh'));
         $tomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay());
         $afterTomorrow = $this->getScheduleStats(now('Asia/Ho_Chi_Minh')->addDay(2));
+
+        $prisonerStats = (clone $scheduleQuery2)
+            ->published()
+            ->select('prisoner_id', 'relatives')
+            ->get()
+            ->groupBy('prisoner_id');
+
+        $totalVisitedPrisoners = $prisonerStats->count();
+
+        $totalVisitedRelatives = $prisonerStats->sum(function ($schedules) {
+            return $schedules->sum(function ($schedule) {
+                return count($schedule->relatives ?? []);
+            });
+        });
 
         return view('admin.thongke.index', [
             'search' => $prisonerName,
@@ -154,6 +170,8 @@ class DashboardController extends Controller
             'tomorrowSchedules' => $tomorrow,
             'afterTomorrowSchedules' => $afterTomorrow,
 
+            'totalVisitedPrisoners' => $totalVisitedPrisoners,
+            'totalVisitedRelatives' => $totalVisitedRelatives,
         ]);
     }
 }

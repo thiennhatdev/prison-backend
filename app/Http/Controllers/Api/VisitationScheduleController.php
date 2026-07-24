@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\VisitationSchedule;
+use App\Models\Prisoner;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -18,8 +19,7 @@ class VisitationScheduleController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'prisoner_name' => 'required',
-            'prisoner_birthday' => 'required',
-            'prisoner_address' => 'required',
+            'prisoner_code' => 'required',
             'pt' => 'required',
             'visitDate' => 'required|date',
             'visitTime' => ['required', 'date_format:H:i'],
@@ -74,14 +74,26 @@ class VisitationScheduleController extends Controller
         //     ], 422);
         // }
 
+        $prisoner = Prisoner::query()
+            ->where('username', $request->prisoner_name)
+            ->where('prisoner_code', $request->prisoner_code)
+            ->first();
+
+        if (!$prisoner) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không có phạm nhân trùng khớp.'
+            ], 422);
+        }
+
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
-        $exists = VisitationSchedule::whereHas('translations', function ($query) use ($request) {
-                $query->where('locale', 'en')
-                    ->where('title', $request->prisoner_name);
+        $exists = VisitationSchedule::query()
+            ->published()
+            ->whereHas('prisoner', function ($query) use ($request) {
+                $query->where('username', $request->prisoner_name)
+                    ->where('prisoner_code', $request->prisoner_code);
             })
             ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
-            ->where('prisoner_sex', $request->prisoner_sex)
-            ->whereDate('prisoner_birthday', $request->prisoner_birthday)
             ->whereYear('visitDate', $visitDate->year)
             ->whereMonth('visitDate', $visitDate->month)
             ->exists();
@@ -120,10 +132,8 @@ class VisitationScheduleController extends Controller
                 'reason' => $request->reason,
                 'count' => $request->count,
                 'title' => $request->prisoner_name,
+                'prisoner_id' => $prisoner->id,
                 'prisoner_name' => $request->prisoner_name,
-                'prisoner_sex' => $request->prisoner_sex,
-                'prisoner_birthday' => $request->prisoner_birthday,
-                'prisoner_address' => $request->prisoner_address,
                 'relatives' => $request->relatives,
                 'customer_id' => $request->user()->id,
             ]);

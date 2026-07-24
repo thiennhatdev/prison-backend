@@ -13,8 +13,12 @@ return new class extends Migration
             createDefaultTableFields($table);
             
             $table->integer('position')->unsigned()->nullable();
-            $table->string('code', 200)->nullable();
+            $table->string('prisoner_code', 200)->nullable();
             $table->string('username', 200)->nullable();
+            $table->string('prisoner_sex', 200)->nullable();
+            $table->string('prisoner_birthday', 200)->nullable();
+            $table->string('prisoner_address', 200)->nullable();
+            $table->json('phones')->nullable();
             $table->boolean('is_allow_visit')->default(true);
             // add those 2 columns to enable publication timeframe fields (you can use publish_start_date only if you don't need to provide the ability to specify an end date)
             // $table->timestamp('publish_start_date')->nullable();

@@ -10,6 +10,8 @@ use A17\Twill\Services\Forms\Form;
 use A17\Twill\Services\Forms\Fields\Select;
 use A17\Twill\Services\Forms\Options;
 use A17\Twill\Services\Forms\Option;
+use App\Enums\RelationshipEnum;
+use A17\Twill\Services\Forms\InlineRepeater;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -32,11 +34,50 @@ class PrisonerController extends BaseModuleController
         $form = parent::getForm($model);
 
         $form->add(
-            Input::make()->name('code')->label('Mã phạm nhân')->disabled()
+            Input::make()->name('prisoner_code')->label('Mã giam')
         );
 
         $form->add(
             Input::make()->name('username')->label('Họ tên')
+        );
+
+        $form->add(
+            Select::make()
+                ->name('prisoner_sex')
+                ->label('Giới tính')
+                ->options([
+                    ['value' => 'MALE', 'label' => 'Nam'],
+                    ['value' => 'FEMALE', 'label' => 'Nữ'],
+                ])
+        ) ;
+
+        
+        $form->add(
+            Input::make()
+            ->name('prisoner_birthday')
+            ->label('Năm sinh phạm nhân')
+        );
+
+        $form->add(
+            Input::make()
+            ->name('prisoner_address')
+            ->label('Địa chỉ phạm nhân')
+        );
+
+        $form->add(
+            InlineRepeater::make()->name('phones')->label("SĐT thân thích")
+            ->max(2)    
+            ->fields([
+                    Input::make()->name('name')->label('Tên'),
+                    Input::make()->name('phone')->label('SĐT'),
+                    Select::make()
+                        ->name('relationship')
+                        ->label('Mối quan hệ')
+                        ->options(
+                            Options::make(RelationshipEnum::twillOptions())
+                        )
+                    
+                ]) 
         );
 
         $form->add(
@@ -62,12 +103,25 @@ class PrisonerController extends BaseModuleController
         $table = parent::additionalIndexTableColumns();
 
         $table->add(
-            Text::make()->field('code')->title('Mã phạm nhân')
+            Text::make()->field('prisoner_code')->title('Mã giam')
         );
 
         $table->add(
             Text::make()->field('username')->title('Họ tên')
         );
+
+        $table->add(
+            Text::make()->field('prisoner_sex')->title('Giới tính')
+        );
+
+        $table->add(
+            Text::make()->field('prisoner_birthday')->title('Năm sinh')
+        );
+
+        $table->add(
+            Text::make()->field('prisoner_address')->title('Địa chỉ')
+        );
+
 
         return $table;
     }

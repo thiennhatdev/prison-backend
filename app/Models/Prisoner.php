@@ -23,14 +23,22 @@ class Prisoner extends Model implements Sortable
         'title',
         'description',
         'position',
-        'code',
+        'prisoner_code',
         'username',
         'is_allow_visit',
+        'prisoner_birthday',
+        'prisoner_sex',
+        'prisoner_address',
+        'phones',
     ];
     
     public $translatedAttributes = [
         'title',
         'description',
+    ];
+
+     protected $casts = [
+        'phones' => 'array',
     ];
     
     public $slugAttributes = [

@@ -41,10 +41,8 @@ class VisitationSchedule extends Model implements Sortable
         'childVisitGroup',
         'identification',
         'prisoner_name',
-        'prisoner_birthday',
-        'prisoner_sex',
-        'prisoner_address',
         'refuse',
+        'refuse_other',
         'reason'
     ];
     
@@ -148,6 +146,11 @@ class VisitationSchedule extends Model implements Sortable
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function prisoner()
+    {
+        return $this->belongsTo(Prisoner::class);
     }
     
 }
