@@ -134,6 +134,9 @@ class VisitationScheduleController extends Controller
                 'title' => $request->prisoner_name,
                 'prisoner_id' => $prisoner->id,
                 'prisoner_name' => $request->prisoner_name,
+                'prisoner_sex' => $request->prisoner_sex,
+                'prisoner_birthday' => $request->prisoner_birthday,
+                'prisoner_address' => $request->prisoner_address,
                 'relatives' => $request->relatives,
                 'customer_id' => $request->user()->id,
             ]);
@@ -147,10 +150,15 @@ class VisitationScheduleController extends Controller
                     ->size(300)
                     ->generate($token);
 
+            $scheduleResponse = collect($schedule->toArray())
+                ->merge([
+                    'prisoner_code' => $prisoner->prisoner_code,
+                ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Đăng ký lịch thăm thành công',
-                'data' => $schedule,
+                'data' => $scheduleResponse,
                 'qr_code' =>  'data:image/svg+xml;base64,' . base64_encode($qrCode)
             ], 201);
 

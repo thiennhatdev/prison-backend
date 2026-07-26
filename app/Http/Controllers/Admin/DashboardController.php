@@ -103,6 +103,7 @@ class DashboardController extends Controller
 
         $prisonerStats = (clone $scheduleQuery2)
             ->published()
+            ->where('status', 'DONE')
             ->select('prisoner_id', 'relatives')
             ->get()
             ->groupBy('prisoner_id');

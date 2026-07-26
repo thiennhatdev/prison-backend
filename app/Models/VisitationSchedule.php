@@ -41,6 +41,9 @@ class VisitationSchedule extends Model implements Sortable
         'childVisitGroup',
         'identification',
         'prisoner_name',
+        'prisoner_sex',
+        'prisoner_birthday',
+        'prisoner_address',
         'refuse',
         'refuse_other',
         'reason'

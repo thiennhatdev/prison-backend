@@ -15,6 +15,9 @@ return new class extends Migration
             createDefaultTableFields($table);
             
             $table->string('prisoner_name', 200)->nullable();
+            $table->string('prisoner_sex', 200)->nullable();
+            $table->string('prisoner_birthday', 200)->nullable();
+            $table->string('prisoner_address', 200)->nullable();
             $table->integer('position')->unsigned()->nullable();
             $table->json('relatives')->nullable();
             $table->foreignIdFor(Prisoner::class)->nullable();

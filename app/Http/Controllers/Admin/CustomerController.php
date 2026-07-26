@@ -74,4 +74,21 @@ class CustomerController extends Controller
 
         return back();
     }
+
+    public function updatePhone(Request $request, Customer $customer)
+    {
+        $request->validate([
+            'phone' => [
+                'required',
+                'regex:/^(0|\+84)[0-9]{9}$/',
+                'unique:customers,phone,' . $customer->id,
+            ],
+        ]);
+
+        $customer->update([
+            'phone' => $request->phone,
+        ]);
+
+        return back()->with('success', 'Cập nhật số điện thoại thành công.');
+    }
 }

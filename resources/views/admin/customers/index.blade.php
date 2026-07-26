@@ -103,6 +103,41 @@
     border-radius: 6px;
     padding: 0 10px;
 }
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.4);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.modal{
+    background:#fff;
+    width:400px;
+    padding:24px;
+    border-radius:10px;
+}
+
+.modal-label {
+    display: block;
+    margin-bottom: 12px;
+    font-weight: 700;
+    color: #374151;
+}
+
+.modal-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: .2s;
+    box-sizing: border-box;
+}
+
 </style>
 
 @endpush
@@ -243,7 +278,7 @@
                             <form
                                 method="POST"
                                 action="{{ route('admin.customers.toggle', $customer) }}"
-                                style="display:inline"
+                                style="display:flex; gap: 5px; align-items: center;"
                             >
                                 @csrf
 
@@ -252,6 +287,14 @@
     class="btn {{ $customer->is_active ? 'btn-danger' : 'btn-success' }}"
 >
     {{ $customer->is_active ? 'Khóa' : 'Mở khóa' }}
+</button>
+<button
+    type="button"
+    class="btn btn-primary"
+    style=" white-space: nowrap"
+    onclick="openPhoneModal({{ $customer->id }}, '{{ $customer->phone }}')"
+>
+    Sửa SĐT
 </button>
 
                             </form>
@@ -289,4 +332,54 @@
 
 </div>
 
+<div id="phoneModal" style="display:none;" class="modal-overlay">
+    <div class="modal">
+        <h3 class="modal-label">Sửa số điện thoại</h3>
+
+        <form id="phoneForm" method="POST">
+            @csrf
+
+            <input
+                type="text"
+                name="phone"
+                id="phoneInput"
+                class="modal-input"
+                placeholder="Nhập số điện thoại"
+            >
+
+            <div style="margin-top:20px; display: flex; justify-content: flex-end; gap: 5px">
+                <button class="btn btn-success">
+                    Lưu
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="closePhoneModal()"
+                >
+                    Hủy
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openPhoneModal(id, phone)
+{
+    document.getElementById('phoneModal').style.display = 'flex';
+
+    document.getElementById('phoneInput').value = phone;
+
+    document.getElementById('phoneForm').action =
+        '/admin/customers/' + id + '/phone';
+}
+
+function closePhoneModal()
+{
+    document.getElementById('phoneModal').style.display = 'none';
+}
+</script>
+
 @endsection
+

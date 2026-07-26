@@ -98,31 +98,34 @@ class PrisonerController extends BaseModuleController
     /**
      * This is an example and can be removed if no modifications are needed to the table.
      */
-    protected function additionalIndexTableColumns(): TableColumns
+    protected function getIndexTableColumns(): TableColumns
     {
-        $table = parent::additionalIndexTableColumns();
+        $columns = TableColumns::make();
 
-        $table->add(
+        $columns->add(
             Text::make()->field('prisoner_code')->title('Mã giam')
         );
 
-        $table->add(
-            Text::make()->field('username')->title('Họ tên')
+        $columns->add(
+            Text::make()
+                ->field('username')
+                ->title('Tên phạm nhân')
+                ->linkToEdit()
         );
 
-        $table->add(
-            Text::make()->field('prisoner_sex')->title('Giới tính')
+        $columns->add(
+            Text::make()->field('prisoner_sex_label')->title('Giới tính')
         );
 
-        $table->add(
+        $columns->add(
             Text::make()->field('prisoner_birthday')->title('Năm sinh')
         );
 
-        $table->add(
+        $columns->add(
             Text::make()->field('prisoner_address')->title('Địa chỉ')
         );
 
 
-        return $table;
+        return $columns;
     }
 }

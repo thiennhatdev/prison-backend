@@ -45,6 +45,14 @@ class Prisoner extends Model implements Sortable
         'title',
     ];
 
+    public function getPrisonerSexLabelAttribute(): string
+    {
+        return [
+            'MALE' => 'Nam',
+            'FEMALE' => 'Nữ',
+        ][$this->prisoner_sex] ?? '';
+    }
+
      public function visitationSchedules(): HasMany
         {
         return $this->hasMany(VisitationSchedule::class, 'prisoner_id');

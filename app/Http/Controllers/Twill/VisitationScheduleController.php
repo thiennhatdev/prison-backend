@@ -93,6 +93,29 @@ class VisitationScheduleController extends BaseModuleController
 
         $form->add(
             Select::make()
+                ->name('prisoner_sex')
+                ->label('Giới tính')
+                ->options([
+                    ['value' => 'MALE', 'label' => 'Nam'],
+                    ['value' => 'FEMALE', 'label' => 'Nữ'],
+                ])
+        ) ;
+
+        
+        $form->add(
+            Input::make()
+            ->name('prisoner_birthday')
+            ->label('Năm sinh phạm nhân')
+        );
+
+        $form->add(
+            Input::make()
+            ->name('prisoner_address')
+            ->label('Địa chỉ phạm nhân')
+        );
+
+        $form->add(
+            Select::make()
                 ->name('pt')
                 ->label('Trại tạm giam')
                 ->options(PtEnum::options())
@@ -277,6 +300,12 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
                 ->field('visit_weekday_label')
                 ->title('Thứ')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('prisoner.prisoner_code')
+                ->title('Mã giam')
         );
 
         $columns->add(

@@ -64,4 +64,9 @@ Route::middleware(['web', 'auth:twill_users'])
             '/customers/{customer}/toggle',
             [CustomerController::class, 'toggle']
         )->name('admin.customers.toggle');
+
+        Route::post(
+        '/customers/{customer}/phone',
+        [CustomerController::class, 'updatePhone']
+    )->name('admin.customers.phone');
     });
