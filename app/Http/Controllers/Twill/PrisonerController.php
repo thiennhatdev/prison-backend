@@ -21,6 +21,8 @@ class PrisonerController extends BaseModuleController
     /**
      * This method can be used to enable/disable defaults. See setUpController in the docs for available options.
      */
+    protected ?array $searchColumns = ['username'];
+
     protected function setUpController(): void
     {
     }
@@ -34,7 +36,7 @@ class PrisonerController extends BaseModuleController
         $form = parent::getForm($model);
 
         $form->add(
-            Input::make()->name('prisoner_code')->label('Mã giam')
+            Input::make()->name('prisoner_code')->label('Số giam')
         );
 
         $form->add(
@@ -103,7 +105,7 @@ class PrisonerController extends BaseModuleController
         $columns = TableColumns::make();
 
         $columns->add(
-            Text::make()->field('prisoner_code')->title('Mã giam')
+            Text::make()->field('prisoner_code')->title('Số giam')
         );
 
         $columns->add(

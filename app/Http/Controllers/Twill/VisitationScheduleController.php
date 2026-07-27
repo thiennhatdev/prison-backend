@@ -305,7 +305,7 @@ class VisitationScheduleController extends BaseModuleController
         $columns->add(
             Text::make()
                 ->field('prisoner.prisoner_code')
-                ->title('Mã giam')
+                ->title('Số giam')
         );
 
         $columns->add(

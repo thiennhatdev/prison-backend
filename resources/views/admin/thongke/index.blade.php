@@ -453,7 +453,7 @@
             </span>
         </div>
         <div class="dashboard-item">
-            <span>Tổng lịch chưa duyệt (phê duyệt từ chối)</span>
+            <span>Tổng lịch chưa duyệt</span>
             <span class="dashboard-number">
                 {{ $totalSchedulesDraft }}
             </span>

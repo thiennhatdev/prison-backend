@@ -74,8 +74,12 @@ class VisitationScheduleController extends Controller
         //     ], 422);
         // }
 
+        $lastName = str($request->prisoner_name)
+            ->trim()
+            ->afterLast(' ');
+
         $prisoner = Prisoner::query()
-            ->where('username', $request->prisoner_name)
+            ->where('username', $lastName)
             ->where('prisoner_code', $request->prisoner_code)
             ->first();
 
@@ -192,7 +196,9 @@ class VisitationScheduleController extends Controller
 
      public function list(Request $request)
     {
-        $schedules = VisitationSchedule::where('customer_id', $request->user()->id)
+        $schedules = VisitationSchedule::query()
+            ->with('prisoner')
+            ->where('customer_id', $request->user()->id)
             ->latest()
             ->get();
 
@@ -201,7 +207,9 @@ class VisitationScheduleController extends Controller
 
      public function nearest(Request $request)
     {
-        $schedule = VisitationSchedule::published()
+        $schedule = VisitationSchedule::query()
+            ->published()
+            ->with('prisoner')
             ->where('customer_id', $request->user()->id)
             ->whereDate('visitDate', '>=', Carbon::today())
             ->orderBy('visitDate', 'asc')
