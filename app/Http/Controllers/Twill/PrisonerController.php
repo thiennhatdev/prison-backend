@@ -12,7 +12,10 @@ use A17\Twill\Services\Forms\Options;
 use A17\Twill\Services\Forms\Option;
 use App\Enums\RelationshipEnum;
 use A17\Twill\Services\Forms\InlineRepeater;
+use Illuminate\Http\Request;
 
+use App\Imports\PrisonerImport;
+use Maatwebsite\Excel\Facades\Excel;
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
 class PrisonerController extends BaseModuleController
@@ -130,4 +133,42 @@ class PrisonerController extends BaseModuleController
 
         return $columns;
     }
+
+   public function additionalTableActions(): array
+{
+    return [
+        'import' => [
+            'name' => 'Nhập DS phạm nhân',
+            'variant' => 'primary',
+            'size' => 'small',
+            'link' => route('twill.prisoners.import'),
+            'type' => 'a',
+        ],
+    ];
+}
+
+    public function showImport()
+    {
+        return view('twill.prisoners.import');
+}
+
+    public function import(Request $request)
+{
+    $request->validate([
+        'file' => [
+            'required',
+            'file',
+            'mimes:xlsx,xls',
+        ],
+    ]);
+
+    Excel::import(
+        new PrisonerImport(),
+        $request->file('file')
+    );
+
+    return redirect()
+        ->route('twill.prisoners.index')
+        ->with('success', 'Import thành công');
+}
 }

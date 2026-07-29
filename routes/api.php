@@ -44,3 +44,9 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
 
 Route::get('visitation-schedule/export', [App\Http\Controllers\Twill\VisitationScheduleController::class, 'export'])
     ->name('twill.visitationSchedules.export');
+
+Route::get('prisoners/import', [App\Http\Controllers\Twill\PrisonerController::class, 'showImport'])
+    ->name('twill.prisoners.import');
+
+Route::post('prisoners/import', [App\Http\Controllers\Twill\PrisonerController::class, 'import'])
+    ->name('twill.prisoners.import.store');

@@ -14,6 +14,7 @@ use A17\Twill\Services\Forms\Options;
 use A17\Twill\Services\Forms\Option;
 use App\Repositories\PrisonerRepository;
 use App\Models\Customer;
+use App\Models\Prisoner;
 use A17\Twill\Services\Listings\Filters\TableFilters;
 use A17\Twill\Services\Listings\Filters\TableMainFilters;
 use A17\Twill\Services\Listings\Filters\MainFilter;
@@ -150,12 +151,14 @@ class VisitationScheduleController extends BaseModuleController
 
         
 
-        $prisoners = app()->make(PrisonerRepository::class)->listAll();
- 
-        $arrPrisoner= [];
-        foreach ($prisoners->toArray() as $key => $value) {
-            array_push($arrPrisoner, Option::make($key, $value));
-        }
+        $arrPrisoner = Prisoner::query()
+            ->orderBy('username')
+            ->get()
+            ->map(fn ($prisoner) => Option::make(
+                $prisoner->id,
+                $prisoner->username
+            ))
+            ->toArray();
 
         $form->add(
             InlineRepeater::make()->name('relatives')->label("Người thăm")
