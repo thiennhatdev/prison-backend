@@ -51,7 +51,7 @@ enum RelationshipEnum: string
             self::CON_DE => 'Con đẻ',
             self::CON_NUOI => 'Con nuôi',
             self::CON_DAU => 'Con dâu',
-            self::CON_RE => 'Con rễ',
+            self::CON_RE => 'Con rể',
             self::ONG_NOI => 'Ông nội',
             self::BA_NOI => 'Bà nội',
             self::ONG_NGOAI => 'Ông ngoại',
