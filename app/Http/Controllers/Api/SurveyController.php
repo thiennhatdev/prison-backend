@@ -61,7 +61,7 @@ class SurveyController extends Controller
         }
 
         $survey = Survey::create([
-            'title' => $request->user()->name,
+            'title' => $request->user()->name ?? 'Đánh giá',
             'description' => $request->description,
             'code' => $request->code,
             'point' => $request->point,

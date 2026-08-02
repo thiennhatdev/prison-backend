@@ -93,8 +93,8 @@ class VisitationScheduleController extends Controller
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
         $exists = VisitationSchedule::query()
             ->published()
-            ->whereHas('prisoner', function ($query) use ($request) {
-                $query->where('username', $request->prisoner_name)
+            ->whereHas('prisoner', function ($query) use ($request, $lastName) {
+                $query->where('username', $lastName)
                     ->where('prisoner_code', $request->prisoner_code);
             })
             ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
@@ -179,7 +179,9 @@ class VisitationScheduleController extends Controller
 
     public function verify($token)
     {
-        $schedule = VisitationSchedule::where('qr_token', $token)->first();
+        $schedule = VisitationSchedule::query()
+            ->with('prisoner')
+            ->where('qr_token', $token)->first();
 
         if (!$schedule) {
             return response()->json([
