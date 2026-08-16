@@ -32,7 +32,6 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::get('/prison-rule/{id}', [PrisonRuleController::class, 'detail']);
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
     Route::post('/survey', [SurveyController::class, 'create']);
-    Route::post('/auth/verify-phone', [AuthController::class, 'verifyPhone']);
     Route::get('/surveys', [SurveyController::class, 'list']);
 
     Route::middleware('verify.phone')->group(function () {

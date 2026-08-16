@@ -58,13 +58,14 @@ class AuthController extends Controller
        
         $zaloToken = $request->access_token;
         $name = $request->name;
-
+        $phoneToken = $request->phoneToken;
+        $secretKey = config('services.zalo.app_secret');
         // Call Zalo API lấy profile
 
         $proof = hash_hmac(
             'sha256',
             $zaloToken,
-            config('services.zalo.app_secret')
+            $secretKey
         );
         $profile = Http::get(
             'https://graph.zalo.me/v2.0/me',
@@ -80,14 +81,35 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $customer = Customer::firstOrCreate(
+        $phoneResponse = Http::withHeaders([
+            'access_token' => $zaloToken,
+            'code' => $phoneToken,
+            'secret_key' => $secretKey,
+        ])->get('https://graph.zalo.me/v2.0/me/info');
+
+        if ($phoneResponse->failed()) {
+            throw new \Exception(
+                'Zalo API error: ' . $phoneResponse->body()
+            );
+        }
+
+        $phone = $phoneResponse->json('data.number');
+
+        $data = [
+            'name' => $profile['name'] ?? $name ?? null,
+            'role' => 'CUSTOMER',
+            'is_active' => 1,
+        ];
+
+        if ($phone) {
+            $data['phone'] = $phone;
+        }
+
+        $customer = Customer::updateOrCreate(
             ['zalo_id' => $profile['id']],
-            [
-                'name' => $profile['name'] ?? $name ?? null,
-                'role' => "CUSTOMER",
-                'is_active' => 1,
-            ]
+            $data
         );
+
 
         if (!$customer->is_active) {
             return response()->json([
@@ -100,6 +122,7 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'customer' => $customer,
+            'phoneResponse' => $phoneResponse->json()
         ]);
     }
 
@@ -109,28 +132,6 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-        ]);
-    }
-
-    public function verifyPhone(Request $request)
-    {
-        $request->validate([
-            'phone_number' => ['required', 'string'],
-        ]);
-
-        $user = $request->user();
-
-        Customer::where('id', $user->id)->update([
-            'phone' => $request->phone_number,
-        ]);
-
-        $status = Prisoner::all()->contains(function ($prisoner) use ($request) {
-            return collect($prisoner->phones)
-                ->pluck('phone')
-                ->contains($request->phone_number);
-        });
-        return response()->json([
-            'status' => $status,
         ]);
     }
 }
