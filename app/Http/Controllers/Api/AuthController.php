@@ -62,7 +62,6 @@ class AuthController extends Controller
         $secretKey = config('services.zalo.app_secret');
         // Call Zalo API lấy profile
 return response()->json([
-            'phoneResponse' => $phoneResponse->json(),
             '$secretKey' => $secretKey
 ]);
         $proof = hash_hmac(
