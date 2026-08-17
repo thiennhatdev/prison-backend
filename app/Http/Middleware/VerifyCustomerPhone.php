@@ -16,8 +16,7 @@ class VerifyCustomerPhone
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $phone = $request->user()->phone;
-
+        $phone = preg_replace('/^84/', '0', $request->user()->phone);
         $exists = Prisoner::all()->contains(function ($prisoner) use ($request, $phone) {
             return collect($prisoner->phones)
                 ->pluck('phone')
