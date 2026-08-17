@@ -102,8 +102,15 @@ class AuthController extends Controller
             'is_active' => 1,
         ];
 
+        $isAllowVisit = false;
+
         if ($phone) {
             $data['phone'] = $phone;
+            $isAllowVisit = Prisoner::all()->contains(function ($prisoner) use ($request) {
+                return collect($prisoner->phones)
+                   ->pluck('phone')
+                    ->contains(preg_replace('/^84/', '0', $phone));
+            });
         }
 
         $customer = Customer::updateOrCreate(
@@ -122,7 +129,8 @@ class AuthController extends Controller
 
         return response()->json([
             'token' => $token,
-            'customer' => $customer
+            'customer' => $customer,
+            'isAllowVisit' => $isAllowVisit
         ]);
     }
 
