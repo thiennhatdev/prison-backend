@@ -106,10 +106,11 @@ class AuthController extends Controller
 
         if ($phone) {
             $data['phone'] = $phone;
-            $isAllowVisit = Prisoner::all()->contains(function ($prisoner) use ($request) {
+            $convertedPhone = preg_replace('/^84/', '0', $phone);
+            $isAllowVisit = Prisoner::all()->contains(function ($prisoner) use ($request, $convertedPhone) {
                 return collect($prisoner->phones)
                    ->pluck('phone')
-                    ->contains(preg_replace('/^84/', '0', $phone));
+                    ->contains($convertedPhone);
             });
         }
 
