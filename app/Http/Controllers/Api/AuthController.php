@@ -96,29 +96,34 @@ class AuthController extends Controller
 
         $phone = $phoneResponse->json('data.number');
 
-        $data = [
-            'name' => $profile['name'] ?? $name ?? null,
-            'role' => 'CUSTOMER',
-            'is_active' => 1,
-        ];
-
-        $isAllowVisit = false;
+        $phoneInPrisoner = false;
 
         if ($phone) {
-            $data['phone'] = $phone;
             $convertedPhone = preg_replace('/^84/', '0', $phone);
-            $isAllowVisit = Prisoner::all()->contains(function ($prisoner) use ($request, $convertedPhone) {
+            $phoneInPrisoner = Prisoner::all()->contains(function ($prisoner) use ($request, $convertedPhone) {
                 return collect($prisoner->phones)
                    ->pluck('phone')
                     ->contains($convertedPhone);
             });
         }
 
-        $customer = Customer::updateOrCreate(
-            ['zalo_id' => $profile['id']],
-            $data
-        );
+            $customer = Customer::firstOrNew([
+                'zalo_id' => $profile['id'],
+            ]);
 
+            // Chỉ set role khi tạo Customer mới
+            if (!$customer->exists) {
+                $customer->role = 'CUSTOMER';
+            }
+
+            $customer->name = $profile['name'] ?? $name ?? null;
+            $customer->is_active = 1;
+
+            if ($phone) {
+                $customer->phone = $phone;
+            }
+
+            $customer->save();
 
         if (!$customer->is_active) {
             return response()->json([
@@ -131,7 +136,7 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'customer' => $customer,
-            'isAllowVisit' => $isAllowVisit
+            'phoneInPrisoner' => $phoneInPrisoner
         ]);
     }
 
