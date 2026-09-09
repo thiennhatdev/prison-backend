@@ -43,7 +43,7 @@ class PrisonerController extends BaseModuleController
         );
 
         $form->add(
-            Input::make()->name('username')->label('Họ tên')
+            Input::make()->name('username')->label('Tên phạm nhân (Chỉ nhập tên)')
         );
 
         $form->add(
