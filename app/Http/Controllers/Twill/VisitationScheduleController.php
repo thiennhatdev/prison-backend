@@ -156,7 +156,7 @@ class VisitationScheduleController extends BaseModuleController
             ->get()
             ->map(fn ($prisoner) => Option::make(
                 $prisoner->id,
-                $prisoner->username
+                "{$prisoner->prisoner_code} - {$prisoner->username}"
             ))
             ->toArray();
 
@@ -221,7 +221,7 @@ class VisitationScheduleController extends BaseModuleController
             ->name('prisoner_id')
             ->label('Gắn phạm nhân')
             ->options(
-            Options::make($arrPrisoner)
+                Options::make($arrPrisoner)
             )
         );
 

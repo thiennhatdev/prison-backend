@@ -4,7 +4,7 @@
 
     @csrf
 
-    <input type="file" name="file" required>
+    <input type="file" name="file" required accept=".xlsx">
 
     <button type="submit">
         Import
