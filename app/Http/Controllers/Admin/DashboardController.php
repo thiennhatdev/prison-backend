@@ -153,17 +153,17 @@ class DashboardController extends Controller
                 ->where('is_active', 0)
                 ->count(),
 
-            'totalSchedules' => (clone $scheduleQuery)->count(),
-            'totalSchedulesPublish' => (clone $scheduleQuery)
+            'totalSchedules' => (clone $scheduleQuery2)->count(),
+            'totalSchedulesPublish' => (clone $scheduleQuery2)
                 ->published()
                 ->count(),
-            'totalSchedulesDraft' => (clone $scheduleQuery)
+            'totalSchedulesDraft' => (clone $scheduleQuery2)
                 ->where(function ($q) {
                     $q->whereNull('published')
                         ->orWhere('published', 0);
                 })
                 ->count(),
-            'totalSchedulesDone' => (clone $scheduleQuery)
+            'totalSchedulesDone' => (clone $scheduleQuery2)
                 ->published()
                 ->where('status', 'DONE')
                 ->count(),

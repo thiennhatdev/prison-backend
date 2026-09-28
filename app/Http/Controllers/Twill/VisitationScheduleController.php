@@ -161,6 +161,15 @@ class VisitationScheduleController extends BaseModuleController
             ->toArray();
 
         $form->add(
+            Select::make()
+            ->name('prisoner_id')
+            ->label('Gắn phạm nhân')
+            ->options(
+                Options::make($arrPrisoner)
+            )
+        );
+
+        $form->add(
             InlineRepeater::make()->name('relatives')->label("Người thăm")
                 ->fields([
                     Input::make()->name('cccd')->label('CCCD/CMND'),
@@ -214,15 +223,6 @@ class VisitationScheduleController extends BaseModuleController
                 ->name('refuse_other')
                 ->label('Nhập lý do khác')
                  ->note('Chỉ nhập khi chọn "Lý do khác" trong Lý do từ chối')
-        );
-
-        $form->add(
-            Select::make()
-            ->name('prisoner_id')
-            ->label('Gắn phạm nhân')
-            ->options(
-                Options::make($arrPrisoner)
-            )
         );
 
         $form->add(

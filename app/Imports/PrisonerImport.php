@@ -76,6 +76,7 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                     'prisoner_code' => $currentPrisoner['prisoner_code']
                 ],
                 [
+                    'title' => $currentPrisoner['username'],
                     'username' => $currentPrisoner['username'],
                     'phones' => $phones,
                 ]
