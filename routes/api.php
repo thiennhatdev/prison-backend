@@ -49,3 +49,6 @@ Route::get('prisoners/import', [App\Http\Controllers\Twill\PrisonerController::c
 
 Route::post('prisoners/import', [App\Http\Controllers\Twill\PrisonerController::class, 'import'])
     ->name('twill.prisoners.import.store');
+
+Route::get('prisoners/export', [App\Http\Controllers\Twill\PrisonerController::class, 'export'])
+    ->name('twill.prisoners.export');

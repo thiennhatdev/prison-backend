@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 
 use App\Imports\PrisonerImport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\PrisonerExport;
+
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
 class PrisonerController extends BaseModuleController
@@ -144,31 +146,47 @@ class PrisonerController extends BaseModuleController
             'link' => route('twill.prisoners.import'),
             'type' => 'a',
         ],
+
+        'export' => [
+            'name' => 'Xuất DS phạm nhân',
+            'variant' => 'secondary',
+            'size' => 'small',
+            'link' => route('twill.prisoners.export'),
+            'type' => 'a',
+        ],
     ];
 }
 
     public function showImport()
     {
         return view('twill.prisoners.import');
-}
+    }
 
-    public function import(Request $request)
-{
-    $request->validate([
-        'file' => [
-            'required',
-            'file',
-            'mimes:xlsx,xls',
-        ],
-    ]);
+        public function import(Request $request)
+    {
+        $request->validate([
+            'file' => [
+                'required',
+                'file',
+                'mimes:xlsx,xls',
+            ],
+        ]);
 
-    Excel::import(
-        new PrisonerImport(),
-        $request->file('file')
-    );
+        Excel::import(
+            new PrisonerImport(),
+            $request->file('file')
+        );
 
-    return redirect()
-        ->route('twill.prisoners.index')
-        ->with('success', 'Import thành công');
-}
+        return redirect()
+            ->route('twill.prisoners.index')
+            ->with('success', 'Import thành công');
+    }
+
+    public function export()
+    {
+        return Excel::download(
+            new PrisonerExport(),
+            'danh-sach-pham-nhan.xlsx'
+        );
+    }
 }
