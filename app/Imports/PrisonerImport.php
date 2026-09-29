@@ -37,6 +37,9 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                         [
                             'title' => $currentPrisoner['username'],
                             'username' => $currentPrisoner['username'],
+                            'prisoner_sex' => $currentPrisoner['prisoner_sex'],
+                            'prisoner_birthday' => $currentPrisoner['prisoner_birthday'],
+                            'prisoner_address' => $currentPrisoner['prisoner_address'],
                             'phones' => $phones,
                         ]
                     );
@@ -46,6 +49,15 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                 $currentPrisoner = [
                     'prisoner_code' => $prisonerCode,
                     'username' => $username,
+                    'prisoner_sex' => $this->mapSex(
+                        $row['gioi_tinh'] ?? ''
+                    ),
+                    'prisoner_birthday' => trim(
+                        (string) ($row['nam_sinh'] ?? '')
+                    ),
+                    'prisoner_address' => trim(
+                        (string) ($row['dia_chi'] ?? '')
+                    ),
                 ];
 
                 $phones = [];
@@ -78,23 +90,41 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                 [
                     'title' => $currentPrisoner['username'],
                     'username' => $currentPrisoner['username'],
+                    'prisoner_sex' => $currentPrisoner['prisoner_sex'],
+                    'prisoner_birthday' => $currentPrisoner['prisoner_birthday'],
+                    'prisoner_address' => $currentPrisoner['prisoner_address'],
+                    
                     'phones' => $phones,
                 ]
             );
         }
     }
 
-    private function mapRelationship(?string $value): string
-{
-    $value = mb_strtolower(trim($value ?? ''));
+    private function mapSex(?string $value): ?string
+    {
+        $value = mb_strtolower(trim($value ?? ''));
 
-    foreach (RelationshipEnum::cases() as $case) {
-        if (mb_strtolower($case->label()) === $value) {
-            return $case->value;
-        }
+        return match ($value) {
+            'nam' => 'MALE',
+            'nữ', 'nu' => 'FEMALE',
+            '' => null,
+            default => throw new \InvalidArgumentException(
+                "Giới tính không hợp lệ: {$value}"
+            ),
+        };
     }
 
-    throw new \InvalidArgumentException("Mối quan hệ không hợp lệ: {$value}");
-}
+    private function mapRelationship(?string $value): string
+    {
+        $value = mb_strtolower(trim($value ?? ''));
+
+        foreach (RelationshipEnum::cases() as $case) {
+            if (mb_strtolower($case->label()) === $value) {
+                return $case->value;
+            }
+        }
+
+        throw new \InvalidArgumentException("Mối quan hệ không hợp lệ: {$value}");
+    }
 
 }

@@ -31,6 +31,9 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
                     $data->push([
                         $prisoner->prisoner_code,
                         $prisoner->username,
+                        $this->sexLabel($prisoner->prisoner_sex),
+                        $prisoner->prisoner_birthday,
+                        $prisoner->prisoner_address,
                         '',
                         '',
                         '',
@@ -48,6 +51,9 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
                         // Chỉ ghi thông tin phạm nhân ở dòng đầu tiên
                         $index === 0 ? $prisoner->prisoner_code : '',
                         $index === 0 ? $prisoner->username : '',
+                        $index === 0 ? $this->sexLabel($prisoner->prisoner_sex) : '',
+                        $index === 0 ? $prisoner->prisoner_birthday : '',
+                        $index === 0 ? $prisoner->prisoner_address : '',
 
                         $phone['name'] ?? '',
 
@@ -68,6 +74,9 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
         return [
             'Số giam',
             'Tên phạm nhân',
+            'Giới tính',
+            'Năm sinh',
+            'Địa chỉ',
             'Tên thân nhân',
             'Mối quan hệ',
             'Số điện thoại',
@@ -87,5 +96,13 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
         }
 
         return $value;
+    }
+
+    private function sexLabel(?string $value): string
+    {
+        return [
+            'MALE' => 'Nam',
+            'FEMALE' => 'Nữ',
+        ][$value] ?? $value ?? '';
     }
 }
