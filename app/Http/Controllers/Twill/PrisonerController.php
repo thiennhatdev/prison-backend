@@ -11,6 +11,7 @@ use A17\Twill\Services\Forms\Fields\Select;
 use A17\Twill\Services\Forms\Options;
 use A17\Twill\Services\Forms\Option;
 use App\Enums\RelationshipEnum;
+use App\Enums\ToPhamNhanEnum;
 use A17\Twill\Services\Forms\InlineRepeater;
 use Illuminate\Http\Request;
 
@@ -29,7 +30,7 @@ class PrisonerController extends BaseModuleController
     protected ?array $searchColumns = ['username'];
 
     protected $defaultOrders = [
-        'prisoner_code' => 'desc'
+        'prisoner_code' => 'asc'
     ];
 
     protected function setUpController(): void
@@ -73,6 +74,13 @@ class PrisonerController extends BaseModuleController
             Input::make()
             ->name('prisoner_address')
             ->label('Địa chỉ phạm nhân')
+        );
+
+        $form->add(
+            Select::make()
+                ->name('to')
+                ->label('Tổ phạm nhân')
+                ->options(ToPhamNhanEnum::options())
         );
 
         $form->add(
@@ -136,6 +144,11 @@ class PrisonerController extends BaseModuleController
             Text::make()->field('prisoner_address')->title('Địa chỉ')
         );
 
+        $columns->add(
+            Text::make()
+                ->field('to_label')
+                ->title('Tổ phạm nhân')
+        );
 
         return $columns;
     }

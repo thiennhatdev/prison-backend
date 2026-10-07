@@ -7,6 +7,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use App\Enums\RelationshipEnum;
+use App\Enums\ToPhamNhanEnum;
 
 class PrisonerImport implements ToCollection, WithHeadingRow
 {
@@ -41,6 +42,7 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                             'prisoner_birthday' => $currentPrisoner['prisoner_birthday'],
                             'prisoner_address' => $currentPrisoner['prisoner_address'],
                             'phones' => $phones,
+                            'to' => $currentPrisoner['to'],
                         ]
                     );
 
@@ -57,6 +59,9 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                     ),
                     'prisoner_address' => trim(
                         (string) ($row['dia_chi'] ?? '')
+                    ),
+                    'to' => $this->mapToPhamNhan(
+                        $row['to_pham_nhan'] ?? ''
                     ),
                 ];
 
@@ -93,8 +98,8 @@ class PrisonerImport implements ToCollection, WithHeadingRow
                     'prisoner_sex' => $currentPrisoner['prisoner_sex'],
                     'prisoner_birthday' => $currentPrisoner['prisoner_birthday'],
                     'prisoner_address' => $currentPrisoner['prisoner_address'],
-                    
                     'phones' => $phones,
+                    'to' => $currentPrisoner['to'],
                 ]
             );
         }
@@ -125,6 +130,25 @@ class PrisonerImport implements ToCollection, WithHeadingRow
         }
 
         throw new \InvalidArgumentException("Mối quan hệ không hợp lệ: {$value}");
+    }
+
+    private function mapToPhamNhan(?string $value): ?string
+    {
+        $value = mb_strtolower(trim($value ?? ''));
+
+        foreach (ToPhamNhanEnum::cases() as $case) {
+            if (mb_strtolower($case->label()) === $value) {
+                return $case->value;
+            }
+        }
+
+        if ($value === '') {
+            return null;
+        }
+
+        throw new \InvalidArgumentException(
+            "Tổ phạm nhân không hợp lệ: {$value}"
+        );
     }
 
 }

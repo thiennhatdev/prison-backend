@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Models\Prisoner;
 use App\Enums\RelationshipEnum;
+use App\Enums\ToPhamNhanEnum;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -24,6 +25,11 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
                     ? $prisoner->phones
                     : [];
 
+                    /**
+                 * Tổ phạm nhân
+                 */
+                $toPhamNhan = $prisoner->to?->label() ?? '';
+
                 /**
                  * Không có thân nhân
                  */
@@ -34,6 +40,7 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
                         $this->sexLabel($prisoner->prisoner_sex),
                         $prisoner->prisoner_birthday,
                         $prisoner->prisoner_address,
+                        $toPhamNhan,
                         '',
                         '',
                         '',
@@ -54,6 +61,10 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
                         $index === 0 ? $this->sexLabel($prisoner->prisoner_sex) : '',
                         $index === 0 ? $prisoner->prisoner_birthday : '',
                         $index === 0 ? $prisoner->prisoner_address : '',
+
+                        $index === 0
+                            ? $toPhamNhan
+                            : '',
 
                         $phone['name'] ?? '',
 
@@ -77,6 +88,7 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
             'Giới tính',
             'Năm sinh',
             'Địa chỉ',
+            'Tổ phạm nhân',
             'Tên thân nhân',
             'Mối quan hệ',
             'Số điện thoại',
@@ -105,4 +117,6 @@ class PrisonerExport implements FromCollection, WithHeadings, ShouldAutoSize
             'FEMALE' => 'Nữ',
         ][$value] ?? $value ?? '';
     }
+
+    
 }

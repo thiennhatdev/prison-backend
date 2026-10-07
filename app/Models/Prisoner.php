@@ -13,6 +13,7 @@ use A17\Twill\Models\Behaviors\Sortable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use A17\Twill\Models\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Enums\ToPhamNhanEnum;
 
 class Prisoner extends Model implements Sortable
 {
@@ -30,6 +31,7 @@ class Prisoner extends Model implements Sortable
         'prisoner_sex',
         'prisoner_address',
         'phones',
+        'to',
     ];
     
     public $translatedAttributes = [
@@ -39,6 +41,7 @@ class Prisoner extends Model implements Sortable
 
      protected $casts = [
         'phones' => 'array',
+        'to' => ToPhamNhanEnum::class,
     ];
     
     public $slugAttributes = [
@@ -57,5 +60,10 @@ class Prisoner extends Model implements Sortable
         {
         return $this->hasMany(VisitationSchedule::class, 'prisoner_id');
         }
+
+    public function getToLabelAttribute(): string
+    {
+        return $this->to?->label() ?? '';
+    }
     
 }
