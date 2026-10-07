@@ -28,6 +28,10 @@ class PrisonerController extends BaseModuleController
      */
     protected ?array $searchColumns = ['username'];
 
+    protected $defaultOrders = [
+        'prisoner_code' => 'desc'
+    ];
+
     protected function setUpController(): void
     {
     }

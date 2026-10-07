@@ -17,6 +17,7 @@ use App\Enums\PtEnum;
 use App\Enums\VisitGroupEnum;
 use App\Enums\ChildVisitGroupEnum;
 use App\Enums\VisitationScheduleStatusEnum;
+use App\Enums\ToPhamNhanEnum;
 
 class VisitationSchedule extends Model implements Sortable
 {
@@ -37,6 +38,7 @@ class VisitationSchedule extends Model implements Sortable
         'customer_id',
         'status',
         'pt',
+        'toPhamNhan',
         'visitGroup',
         'childVisitGroup',
         'identification',
@@ -63,6 +65,7 @@ class VisitationSchedule extends Model implements Sortable
         'pt' => PtEnum::class,
         'visitGroup' => VisitGroupEnum::class,
         'childVisitGroup' => ChildVisitGroupEnum::class,
+        'toPhamNhan' => ToPhamNhanEnum::class,
     ];
 
     public function getVisitTimeLabelAttribute(): string
@@ -131,6 +134,11 @@ class VisitationSchedule extends Model implements Sortable
     public function getPtLabelAttribute(): string
     {
         return $this->pt?->label() ?? '';
+    }
+
+    public function getToPhamNhanLabelAttribute(): string
+    {
+        return $this->toPhamNhan?->label() ?? '';
     }
 
     public function getPrisonerSexLabelAttribute(): string

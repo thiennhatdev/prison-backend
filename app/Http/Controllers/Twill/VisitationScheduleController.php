@@ -30,6 +30,7 @@ use App\Enums\PtEnum;
 use App\Enums\VisitGroupEnum;
 use App\Enums\ChildVisitGroupEnum;
 use App\Enums\RelationshipEnum;
+use App\Enums\ToPhamNhanEnum;
 
 use A17\Twill\Http\Controllers\Admin\ModuleController as BaseModuleController;
 
@@ -120,6 +121,13 @@ class VisitationScheduleController extends BaseModuleController
                 ->name('pt')
                 ->label('Trại tạm giam')
                 ->options(PtEnum::options())
+        );
+
+        $form->add(
+            Select::make()
+                ->name('toPhamNhan')
+                ->label('Tổ phạm nhân')
+                ->options(ToPhamNhanEnum::options())
         );
 
         $form->add(
@@ -323,6 +331,12 @@ class VisitationScheduleController extends BaseModuleController
             Text::make()
                 ->field('pt_label')
                 ->title('Nơi quản lý')
+        );
+
+        $columns->add(
+            Text::make()
+                ->field('to_pham_nhan_label')
+                ->title('Tổ phạm nhân')
         );
 
         $columns->add(
