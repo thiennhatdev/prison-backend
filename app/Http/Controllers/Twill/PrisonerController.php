@@ -133,6 +133,12 @@ class PrisonerController extends BaseModuleController
         );
 
         $columns->add(
+            Text::make()
+                ->field('to_label')
+                ->title('Tổ phạm nhân')
+        );
+
+        $columns->add(
             Text::make()->field('prisoner_sex_label')->title('Giới tính')
         );
 
@@ -142,12 +148,6 @@ class PrisonerController extends BaseModuleController
 
         $columns->add(
             Text::make()->field('prisoner_address')->title('Địa chỉ')
-        );
-
-        $columns->add(
-            Text::make()
-                ->field('to_label')
-                ->title('Tổ phạm nhân')
         );
 
         return $columns;
