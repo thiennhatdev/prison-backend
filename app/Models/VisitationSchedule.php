@@ -70,14 +70,27 @@ class VisitationSchedule extends Model implements Sortable
 
     public function getVisitTimeLabelAttribute(): string
     {
-        $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
+        // $start = Carbon::createFromFormat('H:i:s', $this->visitTime);
+        // if (empty($this->visitEndTime)) {
+        //     return $start->format('H:i');
+        // }
+
+        // $end = Carbon::createFromFormat('H:i:s', $this->visitEndTime);
+        // return $start->format('H:i') . ' - ' .
+        //     $end->format('H:i');
+        if (empty($this->visitTime)) {
+            return '';
+        }
+
+        $start = Carbon::parse($this->visitTime);
+
         if (empty($this->visitEndTime)) {
             return $start->format('H:i');
         }
 
-        $end = Carbon::createFromFormat('H:i:s', $this->visitEndTime);
-        return $start->format('H:i') . ' - ' .
-            $end->format('H:i');
+        $end = Carbon::parse($this->visitEndTime);
+
+        return $start->format('H:i') . ' - ' . $end->format('H:i');
     }
 
     public function getStatusLabelAttribute(): string
