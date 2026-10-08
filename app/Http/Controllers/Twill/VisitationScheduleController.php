@@ -39,8 +39,8 @@ class VisitationScheduleController extends BaseModuleController
     protected $moduleName = 'visitationSchedules';
 
     protected $defaultOrders = [
-        'visitDate' => 'asc',
-        'visitTime' => 'asc',
+        'visitDate' => 'desc',
+        'visitTime' => 'desc',
     ];
 
     /**
