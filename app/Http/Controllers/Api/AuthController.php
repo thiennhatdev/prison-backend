@@ -140,6 +140,19 @@ class AuthController extends Controller
         ]);
     }
 
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->currentAccessToken()) {
+            $user->currentAccessToken()->delete();
+        }
+
+        return response()->json([
+            'message' => 'Đăng xuất thành công.'
+        ]);
+    }
+
     public function info(Request $request)
     {
         $user = $request->user();

@@ -33,6 +33,7 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
     Route::post('/survey', [SurveyController::class, 'create']);
     Route::get('/surveys', [SurveyController::class, 'list']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::middleware('verify.phone')->group(function () {
         Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
