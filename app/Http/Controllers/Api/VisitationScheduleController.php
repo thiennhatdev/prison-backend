@@ -80,7 +80,7 @@ class VisitationScheduleController extends Controller
             ->afterLast(' ');
 
         $prisoner = Prisoner::query()
-            ->where('username', $lastName)
+            ->whereRaw("CONVERT(username USING ascii) LIKE CONVERT(? USING ascii)", ['%' . $lastName . '%'])
             ->where('prisoner_code', $request->prisoner_code)
             ->first();
 
@@ -95,7 +95,7 @@ class VisitationScheduleController extends Controller
         $exists = VisitationSchedule::query()
             ->published()
             ->whereHas('prisoner', function ($query) use ($request, $lastName) {
-                $query->where('username', $lastName)
+                $query->whereRaw("CONVERT(username USING ascii) LIKE CONVERT(? USING ascii)", ['%' . $lastName . '%'])
                     ->where('prisoner_code', $request->prisoner_code);
             })
             ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
