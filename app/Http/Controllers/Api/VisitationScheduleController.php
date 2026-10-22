@@ -75,14 +75,23 @@ class VisitationScheduleController extends Controller
         //     ], 422);
         // }
 
-        $lastName = str($request->prisoner_name)
+        $lastName = Str::of($request->prisoner_name)
             ->trim()
-            ->afterLast(' ');
+            ->afterLast(' ')
+            ->toString();
 
         $prisoner = Prisoner::query()
-            ->whereRaw("CONVERT(username USING ascii) LIKE CONVERT(? USING ascii)", ['%' . $lastName . '%'])
             ->where('prisoner_code', $request->prisoner_code)
-            ->first();
+            ->get()
+            ->first(function ($prisoner) use ($lastName) {
+                $dbLastName = Str::of($prisoner->username)
+                    ->trim()
+                    ->afterLast(' ')
+                    ->toString();
+
+                return mb_strtolower($dbLastName) === mb_strtolower($lastName);
+            });
+
 
         if (!$prisoner) {
             return response()->json([
@@ -92,13 +101,17 @@ class VisitationScheduleController extends Controller
         }
 
         // 5. Mỗi phạm nhân chỉ được gặp 1 lần trong tháng
+            
         $exists = VisitationSchedule::query()
             ->published()
             ->whereHas('prisoner', function ($query) use ($request, $lastName) {
-                $query->whereRaw("CONVERT(username USING ascii) LIKE CONVERT(? USING ascii)", ['%' . $lastName . '%'])
-                    ->where('prisoner_code', $request->prisoner_code);
+                $query->where('prisoner_code', $request->prisoner_code)
+                    ->whereRaw(
+                        'LOWER(SUBSTRING_INDEX(TRIM(username), " ", -1)) = LOWER(?)',
+                        [$lastName]
+                    );
             })
-            ->where('visitGroup', VisitGroupEnum::INDIVIDUAL)
+            ->where('visitGroup', VisitGroupEnum::INDIVIDUAL->value)
             ->whereYear('visitDate', $visitDate->year)
             ->whereMonth('visitDate', $visitDate->month)
             ->exists();
