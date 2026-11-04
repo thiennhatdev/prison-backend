@@ -40,6 +40,9 @@ Route::middleware(['web', 'auth:twill_users'])
     ->prefix('admin')
     ->group(function () {
 
+        Route::get('/access-logs', [\App\Http\Controllers\Admin\AccessLogController::class, 'index'])
+            ->name('admin.access-logs.index');
+
         Route::get(
             '/thongke',
             [DashboardController::class, 'index']

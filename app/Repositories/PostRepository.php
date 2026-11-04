@@ -24,7 +24,7 @@ class PostRepository extends ModuleRepository
         $post = Post::where('id', $id)
             ->published() 
             ->with('blocks')
-            ->first();
+            ->firstOrFail();
             
             return [
                     'id' => $post->id,

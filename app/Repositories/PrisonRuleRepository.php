@@ -24,7 +24,7 @@ class PrisonRuleRepository extends ModuleRepository
         $detail = PrisonRule::where('id', $id)
             ->published() 
             ->with('blocks')
-            ->first();
+            ->firstOrFail();
         return [
                     'id' => $detail->id,
                     'title' => $detail->title,

@@ -21,6 +21,12 @@ class PostController extends Controller
      public function detail() 
     {
         $detail = $this->postRepository->postDetail($this->request->id);
+
+        \App\Models\ContentView::create([
+            'content_type' => \App\Models\ContentView::POST,
+            'content_id' => $detail['id'],
+            'viewed_at' => now(),
+        ]);
     
         return response()->json([
             'success' => true,

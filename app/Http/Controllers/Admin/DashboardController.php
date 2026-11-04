@@ -47,6 +47,7 @@ class DashboardController extends Controller
         $fromDate = $request->from_date;
         $toDate = $request->to_date;
 
+        $contentViewQuery = \App\Models\ContentView::query();
         $postQuery = Post::query();
         $customerQuery = Customer::query();
         $scheduleQuery = VisitationSchedule::query();
@@ -82,6 +83,7 @@ class DashboardController extends Controller
         }
 
         if ($fromDate) {
+            $contentViewQuery->whereDate('viewed_at', '>=', $fromDate);
             $postQuery->whereDate('created_at', '>=', $fromDate);
             $customerQuery->whereDate('created_at', '>=', $fromDate);
             $scheduleQuery->whereDate('created_at', '>=', $fromDate);
@@ -90,6 +92,7 @@ class DashboardController extends Controller
         }
 
         if ($toDate) {
+            $contentViewQuery->whereDate('viewed_at', '<=', $toDate);
             $postQuery->whereDate('created_at', '<=', $toDate);
             $customerQuery->whereDate('created_at', '<=', $toDate);
             $scheduleQuery->whereDate('created_at', '<=', $toDate);
@@ -124,6 +127,8 @@ class DashboardController extends Controller
             'fromDate' => $fromDate,
             'toDate' => $toDate,
 
+            'totalPostViews' => (clone $contentViewQuery)->where('content_type', \App\Models\ContentView::POST)->count(),
+            'totalPrisonRuleViews' => (clone $contentViewQuery)->where('content_type', \App\Models\ContentView::PRISON_RULE)->count(),
             'totalPosts' => (clone $postQuery)->count(),
             'publishedPosts' => (clone $postQuery)
                 ->published()
