@@ -94,6 +94,25 @@ class AccessLogTest extends TestCase
         $this->assertSame(1, $view->getData()['logs']->total());
     }
 
+    public function test_date_filter_uses_vietnam_midnight_boundaries(): void
+    {
+        config(['app.timezone' => 'UTC']);
+        foreach (['2026-11-03 16:59:59', '2026-11-03 17:00:00', '2026-11-04 16:59:59', '2026-11-04 17:00:00'] as $date) {
+            AccessLog::create([
+                'accessed_at' => $date, 'status' => 200, 'method' => 'GET',
+                'path' => '/timezone-test', 'duration_ms' => 10,
+            ]);
+        }
+
+        $controller = new \App\Http\Controllers\Admin\AccessLogController();
+        $view = $controller->index(Request::create('/admin/access-logs', 'GET', [
+            'from_date' => '2026-11-04', 'to_date' => '2026-11-04',
+        ]));
+        $logs = $view->getData()['logs'];
+        $this->assertSame(2, $logs->total());
+        $this->assertSame('04/11/2026 23:59:59', $logs->first()->accessed_at->copy()->timezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i:s'));
+    }
+
     protected function tearDown(): void
     {
         Schema::dropIfExists('access_logs');

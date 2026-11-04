@@ -7,7 +7,7 @@
 @section('customPageContent')
 <div class="access-log-page">
     <div class="access-log-heading"><span class="access-log-eyebrow">GIÁM SÁT HỆ THỐNG</span><h1>Nhật ký truy cập</h1></div>
-    <p>Truy cập website/API đi qua ứng dụng · Múi giờ: {{ config('app.timezone') }} · Giữ nhật ký 7 ngày, tự dọn mỗi ngày.</p>
+    <p>Truy cập website/API đi qua ứng dụng · Giờ Việt Nam (UTC+7) · Giữ nhật ký 7 ngày, tự dọn mỗi ngày.</p>
     @if($errors->any())
         <div class="access-log-alert" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>
     @endif
@@ -26,7 +26,7 @@
             <tbody>
             @forelse($logs as $log)
                 <tr>
-                    <td>{{ $log->accessed_at->format('d/m/Y H:i:s') }}</td>
+                    <td>{{ $log->accessed_at->copy()->timezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i:s') }}</td>
                     <td>{{ $log->ip }}</td>
                     <td><span class="access-log-method">{{ $log->method }}</span></td>
                     <td class="access-log-path">{{ $log->path }}</td>

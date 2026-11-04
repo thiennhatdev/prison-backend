@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AccessLog;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
 
 class AccessLogController extends Controller
@@ -19,8 +20,10 @@ class AccessLogController extends Controller
 
         $logs = AccessLog::query()
             ->when($filters['ip'] ?? null, fn ($query, $ip) => $query->where('ip', $ip))
-            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->whereDate('accessed_at', '>=', $date))
-            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->whereDate('accessed_at', '<=', $date))
+            ->when($filters['from_date'] ?? null, fn ($query, $date) => $query->where('accessed_at', '>=',
+                CarbonImmutable::parse($date, 'Asia/Ho_Chi_Minh')->startOfDay()->setTimezone(config('app.timezone'))))
+            ->when($filters['to_date'] ?? null, fn ($query, $date) => $query->where('accessed_at', '<',
+                CarbonImmutable::parse($date, 'Asia/Ho_Chi_Minh')->startOfDay()->addDay()->setTimezone(config('app.timezone'))))
             ->when($request->boolean('errors_only'), fn ($query) => $query->where('status', '>=', 400))
             ->orderByDesc('id')
             ->paginate(50)
