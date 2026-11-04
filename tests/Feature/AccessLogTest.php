@@ -53,6 +53,22 @@ class AccessLogTest extends TestCase
         $this->get('/admin/access-logs')->assertRedirect();
     }
 
+    public function test_prune_removes_only_logs_older_than_seven_days(): void
+    {
+        $this->travelTo(now()->startOfSecond());
+        foreach ([now()->subDays(8), now()->subDays(7), now()] as $date) {
+            AccessLog::create([
+                'accessed_at' => $date, 'status' => 200,
+                'method' => 'GET', 'path' => '/example', 'duration_ms' => 10,
+            ]);
+        }
+
+        $this->artisan('access-logs:prune')->assertSuccessful();
+        $this->assertDatabaseCount('access_logs', 2);
+        $this->assertSame(0, AccessLog::where('accessed_at', '<', now()->subDays(7))->count());
+        $this->travelBack();
+    }
+
     public function test_filters_combine_ip_date_and_errors(): void
     {
         foreach ([

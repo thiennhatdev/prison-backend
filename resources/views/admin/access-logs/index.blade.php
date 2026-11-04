@@ -7,7 +7,7 @@
 @section('customPageContent')
 <div class="access-log-page">
     <div class="access-log-heading"><span class="access-log-eyebrow">GIÁM SÁT HỆ THỐNG</span><h1>Nhật ký truy cập</h1></div>
-    <p>Truy cập website/API đi qua ứng dụng · Múi giờ: {{ config('app.timezone') }}</p>
+    <p>Truy cập website/API đi qua ứng dụng · Múi giờ: {{ config('app.timezone') }} · Giữ nhật ký 7 ngày, tự dọn mỗi ngày.</p>
     @if($errors->any())
         <div class="access-log-alert" role="alert">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>
     @endif
