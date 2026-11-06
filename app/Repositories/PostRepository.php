@@ -25,6 +25,12 @@ class PostRepository extends ModuleRepository
             ->published() 
             ->with('blocks')
             ->first();
+
+        if (!$post) {
+            return null;
+        }
+
+        $post->increment('views');
             
             return [
                     'id' => $post->id,
@@ -33,6 +39,7 @@ class PostRepository extends ModuleRepository
                     'thumbnail' => $post->image('thumbnail'),
                     'blocks' => $post->blocks,
                     'created_at' => $post->created_at,
+                    'views' => $post->views,
             ];
             
     }

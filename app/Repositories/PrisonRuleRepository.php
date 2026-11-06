@@ -25,6 +25,13 @@ class PrisonRuleRepository extends ModuleRepository
             ->published() 
             ->with('blocks')
             ->first();
+
+        if (!$detail) {
+            return null;
+        }
+
+        $detail->increment('views');
+
         return [
                     'id' => $detail->id,
                     'title' => $detail->title,
@@ -32,6 +39,7 @@ class PrisonRuleRepository extends ModuleRepository
                     'thumbnail' => $detail->image('thumbnail'),
                     'blocks' => $detail->blocks,
                     'created_at' => $detail->created_at,
+                    'views' => $detail->views,
             ];
     }
 
