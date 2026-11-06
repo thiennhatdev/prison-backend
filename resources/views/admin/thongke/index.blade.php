@@ -391,6 +391,11 @@
         <h3>📰 Tin tức</h3>
 
         <div class="dashboard-item">
+            <span>Lượt xem (theo ngày xem)</span>
+            <span class="dashboard-number">{{ number_format($totalPostViews, 0, ',', '.') }}</span>
+        </div>
+
+        <div class="dashboard-item">
             <span>Tổng bài viết</span>
             <span class="dashboard-number">
                 {{ $totalPosts }}
@@ -473,6 +478,11 @@
 
     <div class="dashboard-card">
         <h3>📜 Nội quy</h3>
+
+        <div class="dashboard-item">
+            <span>Lượt xem (theo ngày xem)</span>
+            <span class="dashboard-number">{{ number_format($totalPrisonRuleViews, 0, ',', '.') }}</span>
+        </div>
 
         <div class="dashboard-item">
             <span>Tổng số nội quy</span>

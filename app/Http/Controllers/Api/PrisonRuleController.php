@@ -20,6 +20,12 @@ class PrisonRuleController extends Controller
      public function detail() 
     {
         $detail = $this->prisonRuleRepository->detail($this->request->id);
+
+        \App\Models\ContentView::create([
+            'content_type' => \App\Models\ContentView::PRISON_RULE,
+            'content_id' => $detail['id'],
+            'viewed_at' => now(),
+        ]);
     
         return response()->json([
             'success' => true,

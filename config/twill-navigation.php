@@ -1,5 +1,9 @@
 <?php 
 return [
+    'accessLogs' => [
+        'title' => 'Nhật ký truy cập',
+        'route' => 'admin.access-logs.index',
+    ],
     'thongke' => [
         'title' => 'Thống kê',
         'route' => 'admin.thongke.index',
