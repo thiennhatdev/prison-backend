@@ -73,3 +73,9 @@ Route::middleware(['web', 'auth:twill_users'])
         [CustomerController::class, 'updatePhone']
     )->name('admin.customers.phone');
     });
+
+Route::middleware(['web', 'auth:twill_users'])->prefix('admin/commerce')->name('admin.commerce.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\CommerceController::class, 'index'])->name('index');
+    Route::post('/products', [\App\Http\Controllers\Admin\CommerceController::class, 'product'])->name('product');
+    Route::post('/orders/{id}', [\App\Http\Controllers\Admin\CommerceController::class, 'order'])->name('order');
+});

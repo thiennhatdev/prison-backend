@@ -53,3 +53,16 @@ Route::post('prisoners/import', [App\Http\Controllers\Twill\PrisonerController::
 
 Route::get('prisoners/export', [App\Http\Controllers\Twill\PrisonerController::class, 'export'])
     ->name('twill.prisoners.export');
+// SePay authenticates using its own API key, independent of customer tokens.
+Route::post('/webhooks/sepay', \App\Http\Controllers\Api\SepayWebhookController::class);
+Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
+    $controller = \App\Http\Controllers\Api\CommerceController::class;
+    Route::get('/products', [$controller, 'products']);
+    Route::post('/orders', [$controller, 'createOrder']);
+    Route::get('/orders', [$controller, 'orders']);
+    Route::get('/orders/{id}', [$controller, 'order']);
+    Route::post('/deposit-requests', [$controller, 'createDeposit']);
+    Route::get('/deposit-requests', [$controller, 'deposits']);
+    Route::get('/deposit-requests/{id}', [$controller, 'deposit']);
+    Route::get('/payments/{id}', [$controller, 'payment']);
+});

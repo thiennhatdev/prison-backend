@@ -1,5 +1,6 @@
 <?php 
 return [
+    'commerce' => ['title' => 'Đơn hàng và lưu ký', 'route' => 'admin.commerce.index'],
     'accessLogs' => [
         'title' => 'Nhật ký truy cập',
         'route' => 'admin.access-logs.index',
