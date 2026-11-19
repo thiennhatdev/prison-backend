@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use A17\Twill\Facades\TwillPermissions;
 use App\Models\Enums\AdminRole;
+use A17\Twill\Models\User as AdminUser;
 use Illuminate\Support\Facades\Gate;
 
 class AppServiceProvider extends ServiceProvider
@@ -24,7 +25,16 @@ class AppServiceProvider extends ServiceProvider
     {
         TwillPermissions::setRoleEnum(AdminRole::class);
 
-        Gate::define('access-commerce', fn ($user) => $user->isPublished() && $user->role === 'NEW');
-        Gate::define('access-admin-operations', fn ($user) => $user->isPublished() && $user->role !== 'NEW');
+        // Twill's `role` is a string with legacy roles and a Role model when
+        // permissions management is enabled. Deny Twill permissions for NEW.
+        Gate::before(fn ($user, string $ability) => $user instanceof AdminUser
+            && AdminRole::isNewUser($user) && $ability !== 'access-commerce'
+            ? false
+            : null);
+
+        Gate::define('access-commerce', fn ($user) => $user instanceof AdminUser
+            && $user->isPublished() && AdminRole::isNewUser($user));
+        Gate::define('access-admin-operations', fn ($user) => $user instanceof AdminUser
+            && $user->isPublished() && ! AdminRole::isNewUser($user));
     }
 }

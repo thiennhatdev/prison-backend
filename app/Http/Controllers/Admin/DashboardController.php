@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\Customer;
 use App\Models\VisitationSchedule;
 use App\Models\PrisonRule;
+use App\Models\Enums\AdminRole;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +43,7 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
-        if ($request->user('twill_users')->role === 'NEW') {
+        if (AdminRole::isNewUser($request->user('twill_users'))) {
             return redirect()->route('admin.commerce.index');
         }
 

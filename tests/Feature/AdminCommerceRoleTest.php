@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use A17\Twill\Facades\TwillPermissions;
 use A17\Twill\Models\User as AdminUser;
+use A17\Twill\Models\Role as TwillRole;
+use A17\Twill\Facades\TwillNavigation;
 use App\Http\Middleware\LogAccess;
 use App\Models\Enums\AdminRole;
 use Illuminate\Support\Facades\Gate;
@@ -53,6 +55,36 @@ class AdminCommerceRoleTest extends TestCase
             'name' => 'Nước suối', 'category_id' => $categoryId, 'price' => 5000, 'is_active' => 1,
         ])->assertRedirect();
         $this->assertDatabaseHas('products', ['name' => 'Nước suối', 'category_id' => $categoryId]);
+    }
+
+    public function test_new_database_role_only_sees_commerce_when_twill_permissions_are_enabled(): void
+    {
+        config(['twill.enabled.permissions-management' => true]);
+        $this->withoutMiddleware(LogAccess::class);
+        $this->artisan('migrate', ['--force' => true]);
+
+        $user = new AdminUser(['published' => true]);
+        $user->id = 1;
+        $user->setRelation('role', new TwillRole(['name' => 'NEW', 'published' => true]));
+        $this->actingAs($user, 'twill_users');
+
+        $this->assertTrue(AdminRole::isNewUser($user));
+        $this->assertTrue(Gate::forUser($user)->allows('access-commerce'));
+        $this->assertTrue(Gate::forUser($user)->denies('access-admin-operations'));
+        $this->assertTrue(Gate::forUser($user)->denies('manage-modules'));
+        $this->get('/admin')->assertRedirect(route('admin.commerce.index'));
+        $this->get('/admin/commerce')->assertOk();
+        $this->getJson('/admin/customers')->assertForbidden();
+
+        $links = TwillNavigation::buildNavigationTree()['left'];
+        $this->assertCount(1, $links);
+        $this->assertSame('Đơn hàng và lưu ký', reset($links)->getTitle());
+
+        $user->is_superadmin = true;
+        $this->assertTrue(AdminRole::isNewUser($user));
+        $this->assertTrue(Gate::forUser($user)->denies('manage-modules'));
+        $this->assertTrue(Gate::forUser($user)->denies('access-admin-operations'));
+        $this->getJson('/admin/customers')->assertForbidden();
     }
 
     public function test_new_role_can_upload_and_replace_product_image(): void
