@@ -9,6 +9,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/product-images/{product}', \App\Http\Controllers\ProductImageController::class)
+    ->name('products.image');
+
 Route::get('/login', function () {
     return redirect('/admin/login');
 })->name('login');

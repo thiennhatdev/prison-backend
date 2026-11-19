@@ -25,6 +25,8 @@ class Product extends Model
 
     public function getImageUrlAttribute(?string $value): ?string
     {
-        return $this->image_path ? asset('storage/'.$this->image_path) : $value;
+        return $this->image_path
+            ? route('products.image', ['product' => $this, 'v' => substr(sha1($this->image_path), 0, 12)])
+            : $value;
     }
 }

@@ -96,22 +96,28 @@ class AdminCommerceRoleTest extends TestCase
         $user->id = 1;
         $this->actingAs($user, 'twill_users');
         $category = \App\Models\ProductCategory::create(['name' => 'Đồ uống']);
-        $image = fn () => UploadedFile::fake()->createWithContent('product.png', base64_decode(
+        $imageBytes = base64_decode(
             'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg=='
-        ));
+        );
+        $image = fn () => UploadedFile::fake()->createWithContent('product.png', $imageBytes);
 
         $form = ['name' => 'Nước suối', 'category_id' => $category->id, 'price' => 5000, 'is_active' => 1];
         $this->post('/admin/commerce/products', $form + ['image' => $image()])->assertRedirect()->assertSessionHasNoErrors();
         $product = \App\Models\Product::where('name', 'Nước suối')->firstOrFail();
         $firstPath = $product->image_path;
+        $firstUrl = $product->image_url;
         Storage::disk('public')->assertExists($firstPath);
-        $this->assertStringContainsString('/storage/products/', $product->image_url);
+        $this->assertStringContainsString('/product-images/'.$product->id, $product->image_url);
+        $this->assertSame($imageBytes, $this->get(parse_url($product->image_url, PHP_URL_PATH))->streamedContent());
 
         $this->post('/admin/commerce/products', $form + ['id' => $product->id, 'image' => $image()])
             ->assertRedirect()->assertSessionHasNoErrors();
         $product->refresh();
+        $this->assertNotSame($firstUrl, $product->image_url);
         Storage::disk('public')->assertMissing($firstPath);
         Storage::disk('public')->assertExists($product->image_path);
+        Storage::disk('public')->delete($product->image_path);
+        $this->get(parse_url($product->image_url, PHP_URL_PATH))->assertNotFound();
     }
 
     public function test_other_admin_roles_cannot_access_commerce(): void
