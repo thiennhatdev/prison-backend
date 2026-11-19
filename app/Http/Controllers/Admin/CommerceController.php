@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\PrisonerLedgerEntry;
 use App\Models\Product;
 use App\Models\ProductCategory;
+use App\Services\CommerceService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -106,5 +107,17 @@ class CommerceController extends Controller
         });
 
         return back()->with('success', 'Đã cập nhật đơn hàng.');
+    }
+
+    public function reconcileTransaction(Request $request, int $id, CommerceService $service)
+    {
+        $data = $request->validate([
+            'order_id' => 'required|integer|min:1',
+            'note' => 'required|string|min:10|max:500',
+            'confirmed' => 'accepted',
+        ]);
+        $service->reconcileOrder($id, $data['order_id'], $request->user('twill_users')->id, $data['note']);
+
+        return back()->with('success', 'Đã ghép giao dịch với đơn hàng và ghi nhận thanh toán.');
     }
 }

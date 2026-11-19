@@ -22,8 +22,9 @@ Trong SePay:
 - Tạo webhook tiền vào, URL HTTPS công khai: `https://TEN_MIEN/api/webhooks/sepay`.
 - Chọn xác thực **API Key**, nhập cùng khóa `SEPAY_WEBHOOK_KEY`, định dạng JSON.
 - Gửi cả giao dịch không có mã để giữ lịch sử đối soát; không bật bỏ qua giao dịch thiếu mã.
-- Có thể cấu hình hai tiền tố DH và LK để lấy trường `code`. Backend cũng nhận diện đúng một mã DH/LK kèm 20 ký tự trong `content` nếu `code` trống.
+- Có thể cấu hình hai tiền tố DH và LK để lấy trường `code`. Backend cũng tìm mã DH/LK kèm 20 ký tự trong `content` khi `code` trống hoặc không khớp; nhiều mã thanh toán hợp lệ trong cùng giao dịch được giữ lại để đối soát.
 - Bật gửi lại khi HTTP status ngoài 2xx. Thành công trả 201 và `{"success":true}`. Khi lỗi lâu, kiểm tra nhật ký SePay và gửi lại webhook; chưa có tác vụ đồng bộ bù bằng API SePay.
+- Với tài khoản VietinBank cá nhân, nội dung QR bắt đầu bằng `SEVQR` để SePay nhận biến động số dư; API trả `payment.transfer_content` là nội dung cần chuyển khoản. Mã `payment.code` vẫn dùng để ghép đơn.
 - Bản này dùng tài khoản ngân hàng trực tiếp, không dùng tài khoản ảo/subAccount.
 
 Tài liệu nguồn: https://docs.sepay.vn/tich-hop-webhooks.html
@@ -121,6 +122,7 @@ Chỉ trạng thái từ backend xác nhận thanh toán.
 Webhook yêu cầu mã, tài khoản, chiều tiền và số tiền khớp, yêu cầu còn hạn và PENDING.
 Thanh toán, đơn/yêu cầu và bút toán ghi có cập nhật trong một DB transaction.
 `sepay_id` duy nhất chống xử lý lại. Mỗi yêu cầu lưu ký và mỗi giao dịch chỉ có tối đa một bút toán.
+Webhook tự ghép khi tìm được duy nhất một mã thanh toán trong `code` hoặc `content`, sau đó kiểm tra tài khoản nhận, số tiền, chiều giao dịch và hạn thanh toán. Giao dịch thiếu mã đúng được giữ ở `REVIEW` với lý do `UNKNOWN_PAYMENT`; không tự ghép theo số tiền vì nhiều đơn có thể cùng số tiền. Quản trị viên có thể đối chiếu sao kê rồi nhập mã đơn và ghi chú ở tab Giao dịch ngân hàng để ghép thủ công. Thao tác này chỉ áp dụng cho giao dịch `UNKNOWN_PAYMENT` và kiểm tra lại tài khoản nhận, số tiền, trạng thái đơn, giao dịch đã ghép và tài khoản phụ trước khi cập nhật.
 Đơn thanh toán riêng; không trừ tiền lưu ký. Bản này là sổ nhận tiền lưu ký, chưa triển khai các nghiệp vụ chi/rút/hoàn tiền hoặc số dư khả dụng.
 
 Khoản thiếu/thừa, mã không rõ, tài khoản sai, tiền ra, đã thanh toán hoặc quá hạn được giữ ở REVIEW, không cộng tiền tự động. Không tự gộp nhiều khoản chuyển thiếu. Nếu thanh toán PENDING nhận khoản khớp mã nhưng lệch tiền/quá hạn, chuyển thanh toán sang REVIEW; đơn/yêu cầu vẫn chờ, frontend/admin phải đọc thêm trạng thái payment.

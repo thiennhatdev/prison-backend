@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use A17\Twill\Models\User as AdminUser;
 use App\Http\Middleware\LogAccess;
 use App\Models\Customer;
 use App\Models\Payment;
@@ -49,6 +50,7 @@ class CommerceTest extends TestCase
         (require database_path('migrations/2026_11_13_000000_create_commerce_tables.php'))->up();
         (require database_path('migrations/2026_11_19_000000_add_commerce_form_fields.php'))->up();
         (require database_path('migrations/2026_11_19_000100_create_product_categories.php'))->up();
+        (require database_path('migrations/2026_11_20_000000_add_bank_transaction_reconciliation.php'))->up();
         config(['commerce.bank' => 'MB', 'commerce.account_number' => '12345', 'commerce.account_name' => 'TEST', 'commerce.webhook_key' => 'secret']);
         $this->withoutMiddleware(LogAccess::class);
     }
@@ -120,6 +122,113 @@ class CommerceTest extends TestCase
             $this->assertDatabaseHas('bank_transactions', ['sepay_id' => (string) ($i + 1), 'status' => 'REVIEW', 'reason' => $reason]);
         }
         $this->assertDatabaseCount('prisoner_ledger_entries', 0);
+    }
+
+    public function test_webhook_matches_one_order_code_even_when_sepay_code_differs_or_memo_repeats(): void
+    {
+        $this->prisoner();
+        $customer = $this->customer();
+        $category = ProductCategory::create(['name' => 'Đồ uống']);
+        $product = Product::create(['name' => 'Sữa', 'price' => 16000, 'category_id' => $category->id]);
+        $payment = app(CommerceService::class)->create($customer, 'order', $this->people() + [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+        ], 'matched-order');
+        $payload = $this->payload($payment);
+        $payload['code'] = 'DH261120K7ZBQ9';
+        $payload['content'] = 'SEVQR '.$payment->code.' '.$payment->code;
+
+        app(CommerceService::class)->receive($payload);
+
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'MATCHED', 'payment_id' => $payment->id]);
+    }
+
+    public function test_webhook_does_not_choose_between_two_known_payment_codes(): void
+    {
+        $this->prisoner();
+        $customer = $this->customer();
+        $service = app(CommerceService::class);
+        $first = $service->create($customer, 'deposit', $this->people() + ['amount' => 50000], 'first-code');
+        $second = $service->create($customer, 'deposit', $this->people() + ['amount' => 50000], 'second-code');
+        $payload = $this->payload($first);
+        $payload['code'] = null;
+        $payload['content'] = $first->code.' '.$second->code;
+
+        $service->receive($payload);
+
+        $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'REVIEW', 'reason' => 'AMBIGUOUS_PAYMENT']);
+        $this->assertDatabaseHas('payments', ['id' => $first->id, 'status' => 'PENDING']);
+        $this->assertDatabaseHas('payments', ['id' => $second->id, 'status' => 'PENDING']);
+    }
+
+    public function test_unknown_transfer_requires_review_and_can_be_reconciled_once_to_matching_order(): void
+    {
+        $this->prisoner();
+        $customer = $this->customer();
+        $category = ProductCategory::create(['name' => 'Đồ uống']);
+        $product = Product::create(['name' => 'Sữa', 'price' => 16000, 'category_id' => $category->id]);
+        $payment = app(CommerceService::class)->create($customer, 'order', $this->people() + [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+        ], 'reviewed-order');
+        $payload = $this->payload($payment);
+        $payload['code'] = null;
+        $payload['content'] = 'SEVQR DH261120K7ZBQ9';
+        $service = app(CommerceService::class);
+        $service->receive($payload);
+        $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'REVIEW', 'reason' => 'UNKNOWN_PAYMENT']);
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'AWAITING_PAYMENT']);
+
+        $admin = new AdminUser(['role' => 'NEW', 'published' => true]);
+        $admin->id = 7;
+        $this->actingAs($admin, 'twill_users');
+        $this->post('/admin/commerce/transactions/1/reconcile', [
+            'order_id' => $payment->order_id,
+            'note' => 'Đã xác minh sao kê và người chuyển tiền.',
+            'confirmed' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('bank_transactions', [
+            'sepay_id' => '1', 'status' => 'MATCHED', 'reason' => 'MANUALLY_MATCHED',
+            'payment_id' => $payment->id, 'reconciled_by' => 7,
+        ]);
+        $this->expectException(\Symfony\Component\HttpKernel\Exception\HttpException::class);
+        $service->reconcileOrder(1, $payment->order_id, 7, 'Không được ghi nhận hai lần.');
+    }
+
+    public function test_manual_reconciliation_rejects_wrong_amount(): void
+    {
+        $this->prisoner();
+        $customer = $this->customer();
+        $category = ProductCategory::create(['name' => 'Đồ uống']);
+        $product = Product::create(['name' => 'Sữa', 'price' => 16000, 'category_id' => $category->id]);
+        $service = app(CommerceService::class);
+        $payment = $service->create($customer, 'order', $this->people() + [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+        ], 'wrong-amount');
+        $payload = $this->payload($payment);
+        $payload['code'] = null;
+        $payload['content'] = 'SEVQR DH261120K7ZBQ9';
+        $payload['transferAmount'] = 15000;
+        $service->receive($payload);
+
+        try {
+            $service->reconcileOrder(1, $payment->order_id, 7, 'Không được chấp nhận do sai số tiền.');
+            $this->fail('A mismatched transfer must not be reconciled.');
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $exception) {
+            $this->assertSame(409, $exception->getStatusCode());
+        }
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'AWAITING_PAYMENT']);
+        $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'REVIEW', 'payment_id' => null]);
+    }
+
+    public function test_vietinbank_qr_contains_sevqr_and_the_order_code(): void
+    {
+        $payment = new Payment(['bank' => 'VietinBank', 'account_number' => '12345', 'amount' => 16000, 'code' => 'DH'.str_repeat('A', 20), 'status' => 'PENDING', 'expires_at' => now()->addMinutes(30)]);
+        $data = app(CommerceService::class)->paymentData($payment);
+        parse_str(parse_url($data['qr_url'], PHP_URL_QUERY), $query);
+
+        $this->assertSame('SEVQR '.$payment->code, $data['transfer_content']);
+        $this->assertSame($data['transfer_content'], $query['des']);
     }
 
     public function test_order_uses_server_prices_and_creation_is_idempotent(): void

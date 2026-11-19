@@ -1,6 +1,6 @@
 @extends('twill::layouts.free')
 @push('extra_css')
-<link rel="stylesheet" href="{{ asset('css/commerce.css') }}?v=1">
+<link rel="stylesheet" href="{{ asset('css/commerce.css') }}?v=2">
 @endpush
 @section('customPageContent')
 @php
@@ -67,6 +67,9 @@
 @elseif($section === 'transactions')
 SePay #{{ $record->sepay_id }} · Thanh toán #{{ $record->payment_id ?? '—' }}<br>
 {{ $record->payload['accountNumber'] ?? '' }} · {{ $record->payload['content'] ?? '' }}<br>Lý do: {{ $record->reason ?? '—' }}
+@if($record->reconciled_at)
+<br>Ghép thủ công bởi quản trị viên #{{ $record->reconciled_by }} lúc {{ $record->reconciled_at->timezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i:s') }}: {{ $record->reconciliation_note }}
+@endif
 @else
 Phạm nhân #{{ $record->prisoner_id }}
 @if($section !== 'ledger') · Thân nhân #{{ $record->customer_id }}<br>Mã chuyển khoản: {{ $record->payment?->code }}<br>Thanh toán: <span class="commerce-status commerce-status--{{ strtolower($record->payment?->status ?? "pending") }}">{{ $statuses[$record->payment?->status] ?? "Chưa có" }}</span>@endif
@@ -81,6 +84,13 @@ Phạm nhân #{{ $record->prisoner_id }}
 @endif
 </td><td class="commerce-amount">{{ number_format($section === 'categories' ? $record->products_count : ($record->total ?? $record->amount ?? $record->price), 0, ',', '.') }}</td>
 <td><span class="commerce-status commerce-status--{{ strtolower($record->status ?? ($section === "ledger" ? "credited" : ($record->is_active ? "active" : "inactive"))) }}">{{ $statuses[$record->status] ?? ($section === "ledger" ? "Đã ghi có" : ($record->is_active ? ($section === 'categories' ? 'Hiển thị' : 'Đang bán') : ($section === 'categories' ? 'Ẩn' : 'Ngừng bán'))) }}</span>
+@if($section === 'transactions' && $record->status === 'REVIEW' && $record->reason === 'UNKNOWN_PAYMENT')
+<form class="commerce-action commerce-reconcile" method="POST" action="{{ route('admin.commerce.transaction.reconcile', $record->id) }}">@csrf
+<label>Ghép với đơn hàng #<input name="order_id" type="number" min="1" required></label>
+<label>Ghi chú đối soát <input name="note" maxlength="500" minlength="10" required placeholder="Đã kiểm tra sao kê và người chuyển"></label>
+<label class="commerce-confirmation"><input name="confirmed" type="checkbox" value="1" required> Đã đối chiếu sao kê và xác nhận đúng đơn</label>
+<button>Ghi nhận thanh toán</button></form>
+@endif
 @if($section === 'orders' && in_array($record->status, ['PAID','PREPARING']))
 <form class="commerce-action" method="POST" action="{{ route('admin.commerce.order', $record->id) }}">@csrf
 <input type="hidden" name="status" value="{{ $record->status === 'PAID' ? 'PREPARING' : 'DELIVERED' }}">

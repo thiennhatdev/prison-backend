@@ -84,4 +84,5 @@ Route::middleware(['web', 'auth:twill_users', 'can:access-commerce'])->prefix('a
     Route::post('/products', [\App\Http\Controllers\Admin\CommerceController::class, 'product'])->name('product');
     Route::post('/categories', [\App\Http\Controllers\Admin\CommerceController::class, 'category'])->name('category');
     Route::post('/orders/{id}', [\App\Http\Controllers\Admin\CommerceController::class, 'order'])->name('order');
+    Route::post('/transactions/{id}/reconcile', [\App\Http\Controllers\Admin\CommerceController::class, 'reconcileTransaction'])->name('transaction.reconcile');
 });

@@ -108,13 +108,19 @@ class CommerceService
             if ($transaction->status !== 'RECEIVED') {
                 return;
             }
-            $code = $payload['code'] ?? null;
-            if (! $code && preg_match_all('/\b(?:DH|LK)[A-Z0-9]{20}\b/i', $payload['content'] ?? '', $matches) === 1) {
-                $code = strtoupper($matches[0][0]);
+            $codes = [];
+            if (preg_match('/^(?:DH|LK)[A-Z0-9]{20}$/i', (string) ($payload['code'] ?? ''))) {
+                $codes[] = strtoupper($payload['code']);
             }
-            $payment = $code ? Payment::where('code', strtoupper($code))->lockForUpdate()->first() : null;
+            preg_match_all('/\b(?:DH|LK)[A-Z0-9]{20}\b/i', $payload['content'] ?? '', $matches);
+            foreach ($matches[0] as $code) {
+                $codes[] = strtoupper($code);
+            }
+            $payments = Payment::whereIn('code', array_unique($codes))->lockForUpdate()->get();
+            $payment = $payments->count() === 1 ? $payments->first() : null;
             $reason = match (true) {
                 $payload['transferType'] !== 'in' => 'NOT_INCOMING',
+                $payments->count() > 1 => 'AMBIGUOUS_PAYMENT',
                 ! $payment => 'UNKNOWN_PAYMENT',
                 default => null,
             };
@@ -152,12 +158,43 @@ class CommerceService
         }, 3);
     }
 
+    public function reconcileOrder(int $transactionId, int $orderId, int $reviewerId, string $note): void
+    {
+        DB::transaction(function () use ($transactionId, $orderId, $reviewerId, $note) {
+            $transaction = BankTransaction::whereKey($transactionId)->lockForUpdate()->firstOrFail();
+            abort_unless($transaction->status === 'REVIEW' && $transaction->reason === 'UNKNOWN_PAYMENT'
+                && $transaction->payment_id === null, 409, 'Giao dịch không còn chờ ghép thủ công.');
+
+            $order = Order::whereKey($orderId)->lockForUpdate()->firstOrFail();
+            $payment = Payment::where('order_id', $order->id)->lockForUpdate()->firstOrFail();
+            abort_unless($order->status === 'AWAITING_PAYMENT' && $payment->status === 'PENDING'
+                && ! BankTransaction::where('payment_id', $payment->id)->exists(), 409, 'Đơn đã có giao dịch hoặc không còn chờ thanh toán.');
+
+            $payload = $transaction->payload;
+            abort_unless(($payload['transferType'] ?? null) === 'in'
+                && empty($payload['subAccount'])
+                && ($payload['accountNumber'] ?? null) === $payment->account_number
+                && (int) ($payload['transferAmount'] ?? 0) === $payment->amount,
+                409, 'Tài khoản nhận hoặc số tiền không khớp đơn hàng.');
+
+            $payment->update(['status' => 'PAID', 'paid_at' => now()]);
+            $order->update(['status' => 'PAID']);
+            $transaction->update([
+                'payment_id' => $payment->id, 'status' => 'MATCHED', 'reason' => 'MANUALLY_MATCHED',
+                'reconciled_by' => $reviewerId, 'reconciled_at' => now(), 'reconciliation_note' => $note,
+            ]);
+        }, 3);
+    }
+
     public function paymentData(Payment $payment): array
     {
         $data = $payment->toArray();
+        $transferContent = in_array(strtoupper(trim($payment->bank)), ['ICB', 'VIETINBANK', '970415'], true)
+            ? 'SEVQR '.$payment->code : $payment->code;
+        $data['transfer_content'] = $transferContent;
         $data['qr_url'] = 'https://qr.sepay.vn/img?'.http_build_query([
             'bank' => $payment->bank, 'acc' => $payment->account_number,
-            'amount' => $payment->amount, 'des' => $payment->code,
+            'amount' => $payment->amount, 'des' => $transferContent,
         ]);
         $data['is_expired'] = $payment->status === 'PENDING' && $payment->expires_at->isPast();
 

@@ -8,5 +8,5 @@ class BankTransaction extends Model
 {
     protected $guarded = ['id'];
 
-    protected $casts = ['payload' => 'array'];
+    protected $casts = ['payload' => 'array', 'reconciled_at' => 'datetime'];
 }
