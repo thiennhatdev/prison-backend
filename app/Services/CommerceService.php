@@ -32,17 +32,43 @@ class CommerceService
             foreach (['bank', 'account_number', 'account_name', 'webhook_key'] as $field) {
                 abort_unless(config("commerce.$field"), 503, 'Chưa cấu hình thanh toán ngân hàng.');
             }
-            $prisoner = Prisoner::published()->findOrFail($data['prisoner_id']);
             $normalize = fn ($phone) => preg_replace('/^84/', '0', preg_replace('/\D/', '', (string) $phone));
             $phone = $normalize($customer->phone);
-            abort_unless($phone && collect($prisoner->phones ?? [])->contains(fn ($entry) => $normalize($entry['phone'] ?? '') === $phone), 403, 'Bạn không được phép gửi tiền hoặc đặt hàng cho phạm nhân này.');
+            if ($normalize($data['sender']['phone']) !== $phone) {
+                throw ValidationException::withMessages(['sender.phone' => 'Số điện thoại người gửi phải khớp tài khoản đăng nhập.']);
+            }
 
-            $attributes = ['customer_id' => $customer->id, 'prisoner_id' => $prisoner->id];
+            $recipient = $data['recipient'];
+            $candidates = Prisoner::published()->where('prisoner_code', $recipient['prisoner_code'])->get();
+            if ($candidates->isEmpty()) {
+                throw ValidationException::withMessages(['recipient.prisoner_code' => 'Không tìm thấy phạm nhân có số giam này.']);
+            }
+            $lastName = fn (string $name) => mb_strtolower(Str::of($name)->trim()->afterLast(' ')->toString());
+            $candidates = $candidates->filter(fn (Prisoner $prisoner) => $lastName($recipient['name']) === $lastName((string) $prisoner->username));
+            if ($candidates->isEmpty()) {
+                throw ValidationException::withMessages(['recipient.name' => 'Họ tên không khớp số giam đã nhập.']);
+            }
+            $candidates = $candidates->filter(fn (Prisoner $prisoner) => $phone && collect($prisoner->phones ?? [])
+                ->contains(fn ($entry) => $normalize($entry['phone'] ?? '') === $phone));
+            abort_unless($candidates->isNotEmpty(), 403, 'Bạn không được phép gửi tiền hoặc đặt hàng cho phạm nhân này.');
+            if ($candidates->count() > 1) {
+                throw ValidationException::withMessages(['recipient.prisoner_code' => 'Có nhiều phạm nhân trùng thông tin. Vui lòng liên hệ quản trị viên.']);
+            }
+            $prisoner = $candidates->first();
+
+            $attributes = [
+                'customer_id' => $customer->id,
+                'prisoner_id' => $prisoner->id,
+                'sender_details' => $data['sender'] ?? null,
+                'recipient_details' => $data['recipient'] ?? null,
+            ];
             if ($kind === 'order') {
                 $items = [];
                 $amount = 0;
                 foreach ($data['items'] as $item) {
-                    $product = Product::where('is_active', true)->lockForUpdate()->find($item['product_id']);
+                    $product = Product::where('is_active', true)
+                        ->whereHas('productCategory', fn ($query) => $query->where('is_active', true))
+                        ->lockForUpdate()->find($item['product_id']);
                     if (! $product) {
                         throw ValidationException::withMessages(['items' => 'Mặt hàng không còn được bán.']);
                     }

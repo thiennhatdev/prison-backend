@@ -42,6 +42,10 @@ class DashboardController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->user('twill_users')->role === 'NEW') {
+            return redirect()->route('admin.commerce.index');
+        }
+
         $prisonerName = $request->search;
 
         $fromDate = $request->from_date;

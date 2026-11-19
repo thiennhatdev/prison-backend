@@ -23,9 +23,12 @@ Route::middleware(['auth:sanctum', 'role:GATE'])->group(function () {
     Route::put('/allow-visit/{id}', [VisitationScheduleController::class, 'updateStatus']);
 });
 
+Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE,NEW'])->group(function () {
+    Route::get('/user/me', [AuthController::class, 'info']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+});
 
 Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
-    Route::get('/user/me', [AuthController::class, 'info']);
     Route::get('/posts', [PostController::class, 'list']);
     Route::get('/post/{id}', [PostController::class, 'detail']);
     Route::get('/prison-rules', [PrisonRuleController::class, 'list']);
@@ -33,7 +36,6 @@ Route::middleware(['auth:sanctum', 'role:CUSTOMER,GATE'])->group(function () {
     Route::get('/survey/{id}', [SurveyController::class, 'detail']);
     Route::post('/survey', [SurveyController::class, 'create']);
     Route::get('/surveys', [SurveyController::class, 'list']);
-    Route::post('/auth/logout', [AuthController::class, 'logout']);
 
     Route::middleware('verify.phone')->group(function () {
         Route::post('/visitation-schedule', [VisitationScheduleController::class, 'store']);
@@ -55,8 +57,9 @@ Route::get('prisoners/export', [App\Http\Controllers\Twill\PrisonerController::c
     ->name('twill.prisoners.export');
 // SePay authenticates using its own API key, independent of customer tokens.
 Route::post('/webhooks/sepay', \App\Http\Controllers\Api\SepayWebhookController::class);
-Route::middleware(['auth:sanctum', 'role:CUSTOMER'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:NEW'])->group(function () {
     $controller = \App\Http\Controllers\Api\CommerceController::class;
+    Route::get('/product-categories', [$controller, 'categories']);
     Route::get('/products', [$controller, 'products']);
     Route::post('/orders', [$controller, 'createOrder']);
     Route::get('/orders', [$controller, 'orders']);

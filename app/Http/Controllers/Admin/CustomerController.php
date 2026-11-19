@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\VisitationSchedule;
+use Illuminate\Validation\Rule;
 
 class CustomerController extends Controller
 {
@@ -65,7 +66,7 @@ class CustomerController extends Controller
     public function changeRole(Request $request, Customer $customer)
     {
         $request->validate([
-            'role' => 'required'
+            'role' => ['required', Rule::in(array_keys(Customer::ROLES))],
         ]);
 
         $customer->update([

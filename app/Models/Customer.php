@@ -27,6 +27,7 @@ class Customer extends Authenticatable
     const ROLES = [
         'CUSTOMER' => 'Thân nhân',
         'GATE' => 'Cán bộ cổng',
+        'NEW' => 'Đơn hàng và lưu ký',
     ];
 
      public function visitationSchedules()

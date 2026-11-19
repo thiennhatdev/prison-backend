@@ -30,8 +30,8 @@ Tài liệu nguồn: https://docs.sepay.vn/tich-hop-webhooks.html
 
 ## Xác thực và quyền
 
-API thân nhân dùng `Authorization: Bearer TOKEN`, `Accept: application/json`.
-Chỉ tài khoản CUSTOMER đang hoạt động được truy cập. Khi tạo đơn/gửi tiền, số điện thoại phải có trong `phones` của đúng phạm nhân đã được xuất bản; chuẩn hóa đầu 84 thành 0.
+API frontend dùng `Authorization: Bearer TOKEN`, `Accept: application/json`.
+Chỉ tài khoản có role `NEW` đang hoạt động được truy cập các API sản phẩm, đơn hàng, lưu ký và thanh toán bên dưới. Quản trị viên có thể gán role `NEW` trong mục User của admin. Khi tạo đơn/gửi tiền, số điện thoại phải có trong `phones` của đúng phạm nhân đã được xuất bản; chuẩn hóa đầu 84 thành 0.
 Danh sách/chi tiết đơn, lưu ký, thanh toán chỉ trả bản ghi của tài khoản hiện tại.
 Webhook không dùng token thân nhân, dùng `Authorization: Apikey KHOA_BI_MAT`.
 
@@ -39,7 +39,8 @@ Webhook không dùng token thân nhân, dùng `Authorization: Apikey KHOA_BI_MAT
 
 | Method | Path | Chức năng |
 |---|---|---|
-| GET | /api/products | Hàng đang bán, 30 mục/trang |
+| GET | /api/product-categories | Danh mục đang hiển thị, sắp xếp theo `position` và `name` |
+| GET | /api/products | Hàng đang bán, 30 mục/trang; lọc `?category_id=1&search=nước` |
 | POST | /api/orders | Tạo đơn, trả `data` và `payment` |
 | GET | /api/orders | Đơn của tôi, 20 mục/trang |
 | GET | /api/orders/{id} | Chi tiết đơn, mặt hàng và thanh toán |
@@ -55,7 +56,22 @@ POST tạo đơn/yêu cầu bắt buộc header `Idempotency-Key`, tối đa 100
 
 ```json
 {
-  "prisoner_id": 1,
+  "sender": {
+    "name": "Nguyễn Văn A",
+    "identity_number": "012345678901",
+    "phone": "0901234567",
+    "birth_year": 1985,
+    "address": "Hà Nội"
+  },
+  "recipient": {
+    "name": "Trần Văn B",
+    "prisoner_code": "PN001",
+    "birth_year": 1992,
+    "gender": "MALE",
+    "address": "Hà Nội",
+    "group": "UNKNOWN",
+    "subcamp": "Phân trại 1"
+  },
   "items": [
     {"product_id": 1, "quantity": 2},
     {"product_id": 2, "quantity": 1}
@@ -64,21 +80,34 @@ POST tạo đơn/yêu cầu bắt buộc header `Idempotency-Key`, tối đa 100
 }
 ```
 
+`sender` và `recipient` bắt buộc; FE không cần gửi `prisoner_id`. Backend tìm hồ sơ đã xuất bản bằng `recipient.prisoner_code` (số giam) và tên cuối trong `recipient.name`, cùng cách đối chiếu với API đặt lịch thăm gặp. Sau đó backend kiểm tra số điện thoại tài khoản có trong hồ sơ phạm nhân và tự gắn `prisoner_id` nội bộ. Không tìm thấy hoặc trùng nhiều hồ sơ thì trả 422; tài khoản không được phép gửi cho phạm nhân đó thì trả 403. `sender.identity_number` là CMND 9 số hoặc CCCD 12 số; `sender.phone` phải trùng số tài khoản đăng nhập. `recipient.gender` nhận `MALE` hoặc `FEMALE`; `recipient.group` nhận mã tổ `TO_1` đến `TO_7`, `TO_NU` hoặc `UNKNOWN`. Các thông tin này được lưu lại trong `sender_details`, `recipient_details` của đơn để đối chiếu sau này. `subcamp` là tên phân trại nhập từ form vì hồ sơ phạm nhân chưa có trường này.
+
 Giá được lấy từ database, lưu snapshot tên và giá. Không nhận giá/tổng tiền từ client.
 Tối đa 100 loại hàng khác nhau, mỗi loại 1–100 đơn vị. Tổng đơn tối đa 100.000.000 VNĐ.
-Danh mục hiện có giá và bật/tắt bán; chưa quản lý tồn kho hoặc giữ hàng.
+Mặt hàng trả thêm `category_id`, `category` (tên danh mục), `product_category` và `image_url` (có thể null). FE lấy ID từ `/api/product-categories` rồi truyền `category_id` khi lọc; tham số cũ `category` theo tên vẫn được hỗ trợ. Admin quản lý danh mục riêng, sau đó chọn danh mục khi tạo/sửa mặt hàng. Ảnh được tải trực tiếp lên bằng trường `image` trong form `multipart/form-data` (JPEG, PNG hoặc WebP, tối đa 5 MB); backend lưu trên đĩa `public` và trả URL qua `image_url`. Khi triển khai môi trường mới, chạy `php artisan storage:link` để ảnh truy cập được qua `/storage`. Danh mục bị ẩn sẽ không xuất hiện trong API và mặt hàng thuộc danh mục ấy cũng không được bán. Chưa quản lý tồn kho hoặc giữ hàng.
 
 ### Tạo yêu cầu gửi tiền
 
 ```json
-{"prisoner_id": 1, "amount": 500000}
+{
+  "sender": {
+    "name": "Nguyễn Văn A", "identity_number": "012345678901",
+    "phone": "0901234567", "birth_year": 1985, "address": "Hà Nội"
+  },
+  "recipient": {
+    "name": "Trần Văn B", "prisoner_code": "PN001", "birth_year": 1992,
+    "gender": "MALE", "address": "Hà Nội", "group": "UNKNOWN", "subcamp": "Phân trại 1"
+  },
+  "amount": 500000
+}
 ```
 
 Số tiền nguyên VNĐ từ 1.000 đến 100.000.000. Đây là giới hạn kỹ thuật ban đầu, cần điều chỉnh theo quy trình đơn vị trước khi vận hành.
 
 ### Phản hồi tạo
 
-`data` chứa đơn/yêu cầu; `payment` có `id`, `code`, `amount`, `bank`, `account_number`, `account_name`, `expires_at`, `status`, `qr_url`, `is_expired`.
+`data` chứa đơn/yêu cầu cùng `sender_details`, `recipient_details` đã lưu. Với đơn hàng, `data.customer` gồm `id`, `name`, `phone` của tài khoản đặt hàng và `data.prisoner` gồm `id`, `username`, `prisoner_code` của phạm nhân. Các trường này cũng có trong danh sách và chi tiết đơn hàng.
+`payment` có `id`, `code`, `amount`, `bank`, `account_number`, `account_name`, `expires_at`, `status`, `qr_url`, `is_expired`.
 Frontend hiển thị QR và thông tin chuyển khoản, đọc `/api/payments/{id}` định kỳ (ví dụ 5 giây) khi đang chờ; dừng khi đã PAID, REVIEW, hết hạn hoặc rời trang.
 Chỉ trạng thái từ backend xác nhận thanh toán.
 
@@ -100,6 +129,7 @@ Khoản thiếu/thừa, mã không rõ, tài khoản sai, tiền ra, đã thanh 
 
 Menu **Đơn hàng và lưu ký** tại `/admin/commerce`, yêu cầu đăng nhập Twill.
 
+- Quản lý danh mục mặt hàng: thêm, sửa tên/thứ tự, ẩn hoặc hiện. Mặt hàng chọn danh mục từ danh sách đã tạo.
 - Quản lý mặt hàng: thêm, sửa giá/mô tả, ngừng bán.
 - Xem đơn và các mặt hàng; chỉ đơn đã thanh toán mới được chuẩn bị và xác nhận giao.
 - Xem yêu cầu lưu ký và sổ ghi có tự động.
