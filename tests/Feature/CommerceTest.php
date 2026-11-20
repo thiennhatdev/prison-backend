@@ -271,14 +271,19 @@ class CommerceTest extends TestCase
         $data = $this->people() + ['items' => [['product_id' => $product->id, 'quantity' => 3]], 'total' => 1];
         $response = $this->withHeader('Idempotency-Key', 'order-1')->postJson('/api/orders', $data)->assertCreated()->assertJsonPath('data.total', 60000);
         $response->assertJsonPath('data.customer.name', 'Nguyễn Văn A')
+            ->assertJsonPath('data.payment.transfer_content', $response->json('payment.transfer_content'))
             ->assertJsonPath('data.prisoner_id', $prisoner->id)
             ->assertJsonPath('data.sender_details.identity_number', '012345678901')
             ->assertJsonPath('data.recipient_details.subcamp', 'Phân trại 1')
             ->assertJsonPath('data.customer.phone', '0901234567')
             ->assertJsonPath('data.prisoner.username', 'Trần Văn B')
             ->assertJsonPath('data.prisoner.prisoner_code', 'PN001');
-        $this->getJson('/api/orders')->assertOk()->assertJsonPath('data.0.customer.name', 'Nguyễn Văn A');
-        $this->getJson('/api/orders/'.$response->json('data.id'))->assertOk()->assertJsonPath('data.prisoner.prisoner_code', 'PN001');
+        $this->getJson('/api/orders')->assertOk()
+            ->assertJsonPath('data.0.customer.name', 'Nguyễn Văn A')
+            ->assertJsonPath('data.0.payment.transfer_content', $response->json('payment.transfer_content'));
+        $this->getJson('/api/orders/'.$response->json('data.id'))->assertOk()
+            ->assertJsonPath('data.prisoner.prisoner_code', 'PN001')
+            ->assertJsonPath('data.payment.transfer_content', $response->json('payment.transfer_content'));
         $this->postJson('/api/orders', $data)->assertCreated()->assertJsonPath('data.id', $response->json('data.id'));
         $this->assertDatabaseCount('orders', 1);
         $data['items'][0]['quantity'] = 4;
@@ -286,6 +291,8 @@ class CommerceTest extends TestCase
         $payment = Payment::findOrFail($response->json('payment.id'));
         app(CommerceService::class)->receive($this->payload($payment));
         $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->getJson('/api/orders/'.$payment->order_id)->assertOk()
+            ->assertJsonPath('data.status', 'PAID')->assertJsonPath('data.payment.status', 'PAID');
         $this->assertDatabaseCount('prisoner_ledger_entries', 0);
     }
 

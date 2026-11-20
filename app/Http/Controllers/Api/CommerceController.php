@@ -53,7 +53,8 @@ class CommerceController extends Controller
         }
         $payment = $service->create($request->user(), 'order', $data, $this->key($request));
 
-        return response()->json(['data' => $payment->order->load(self::ORDER_RELATIONS), 'payment' => $service->paymentData($payment)], 201);
+        return response()->json(['data' => $this->orderData($payment->order->load(self::ORDER_RELATIONS), $service),
+            'payment' => $service->paymentData($payment)], 201);
     }
 
     public function createDeposit(Request $request, CommerceService $service)
@@ -91,14 +92,26 @@ class CommerceController extends Controller
         ];
     }
 
-    public function orders(Request $request)
+    public function orders(Request $request, CommerceService $service)
     {
-        return response()->json(Order::where('customer_id', $request->user()->id)->with(self::ORDER_RELATIONS)->latest()->paginate(20));
+        return response()->json(Order::where('customer_id', $request->user()->id)
+            ->with(self::ORDER_RELATIONS)->latest()->paginate(20)
+            ->through(fn (Order $order) => $this->orderData($order, $service)));
     }
 
-    public function order(Request $request, int $id)
+    public function order(Request $request, int $id, CommerceService $service)
     {
-        return response()->json(['data' => Order::where('customer_id', $request->user()->id)->with(self::ORDER_RELATIONS)->findOrFail($id)]);
+        $order = Order::where('customer_id', $request->user()->id)->with(self::ORDER_RELATIONS)->findOrFail($id);
+
+        return response()->json(['data' => $this->orderData($order, $service)]);
+    }
+
+    private function orderData(Order $order, CommerceService $service): array
+    {
+        $data = $order->toArray();
+        $data['payment'] = $order->payment ? $service->paymentData($order->payment) : null;
+
+        return $data;
     }
 
     public function deposits(Request $request)

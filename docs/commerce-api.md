@@ -113,7 +113,7 @@ Số tiền nguyên VNĐ từ 1.000 đến 100.000.000. Đây là giới hạn k
 ### Phản hồi tạo
 
 `data` chứa đơn/yêu cầu cùng `sender_details`, `recipient_details` đã lưu. Với đơn hàng, `data.customer` gồm `id`, `name`, `phone` của tài khoản đặt hàng và `data.prisoner` gồm `id`, `username`, `prisoner_code` của phạm nhân. Các trường này cũng có trong danh sách và chi tiết đơn hàng.
-`payment` có `id`, `code`, `amount`, `bank`, `account_number`, `account_name`, `expires_at`, `status`, `qr_url`, `is_expired`.
+`payment` có `id`, `code`, `amount`, `bank`, `account_number`, `account_name`, `expires_at`, `status`, `transfer_content`, `qr_url`, `is_expired`. Lịch sử và chi tiết đơn hàng trả cùng các trường trong `data[*].payment` hoặc `data.payment`.
 Frontend hiển thị QR và thông tin chuyển khoản, đọc `/api/payments/{id}` định kỳ (ví dụ 5 giây) khi đang chờ; dừng khi đã PAID, REVIEW, hết hạn hoặc rời trang.
 Chỉ trạng thái từ backend xác nhận thanh toán.
 
