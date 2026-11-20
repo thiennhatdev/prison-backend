@@ -289,6 +289,44 @@ class CommerceTest extends TestCase
         $this->assertDatabaseCount('prisoner_ledger_entries', 0);
     }
 
+    public function test_order_key_is_the_payment_code_used_by_vietinbank_webhook(): void
+    {
+        config(['commerce.bank' => 'VietinBank', 'commerce.account_number' => '101883618963']);
+        $this->prisoner();
+        $category = ProductCategory::create(['name' => 'Food']);
+        $product = Product::create(['name' => 'Item', 'price' => 5000, 'category_id' => $category->id]);
+        Sanctum::actingAs($this->customer());
+
+        $response = $this->withHeader('Idempotency-Key', 'order-with-transfer-code')
+            ->postJson('/api/orders', $this->people() + [
+                'key' => 'DH261120UWAVV2',
+                'items' => [['product_id' => $product->id, 'quantity' => 1]],
+            ])->assertCreated()
+            ->assertJsonPath('payment.code', 'DH261120UWAVV2')
+            ->assertJsonPath('payment.transfer_content', 'SEVQR DH261120UWAVV2');
+
+        $this->withHeader('Authorization', 'Apikey secret')->postJson('/api/webhooks/sepay', [
+            'id' => 101112949,
+            'gateway' => 'VietinBank',
+            'accountNumber' => '101883618963',
+            'subAccount' => null,
+            'code' => 'DH261120',
+            'content' => '164D61120J15TVS9 SEVQR DH261120UWAVV2',
+            'transferType' => 'in',
+            'transferAmount' => 5000,
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('orders', ['id' => $response->json('data.id'), 'status' => 'PAID']);
+        $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '101112949', 'status' => 'MATCHED']);
+
+        $this->withHeader('Idempotency-Key', 'different-order-same-code')
+            ->postJson('/api/orders', $this->people() + [
+                'key' => 'DH261120UWAVV2',
+                'items' => [['product_id' => $product->id, 'quantity' => 1]],
+            ])->assertUnprocessable()->assertJsonValidationErrors('key');
+        $this->assertDatabaseCount('orders', 1);
+    }
+
     public function test_customer_cannot_access_other_payments_or_send_to_unrelated_prisoner(): void
     {
         $customer = $this->customer();

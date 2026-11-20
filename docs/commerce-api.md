@@ -59,6 +59,7 @@ POST tạo đơn/yêu cầu bắt buộc header `Idempotency-Key`, tối đa 100
 
 ```json
 {
+  "key": "DH261120UWAVV2",
   "sender": {
     "name": "Nguyễn Văn A",
     "identity_number": "012345678901",
@@ -82,6 +83,8 @@ POST tạo đơn/yêu cầu bắt buộc header `Idempotency-Key`, tối đa 100
   "note": "Ghi chú giao hàng"
 }
 ```
+
+`key` trong body tạo đơn là mã chuyển khoản do frontend tạo (tiền tố `DH` và 6–20 chữ/số). Nếu gửi trường này, backend lưu đúng mã đó vào `payment.code` và trả `payment.transfer_content`/`payment.qr_url` chứa cùng mã. Nếu không gửi, backend tự sinh mã. `key` trong body khác với header `Idempotency-Key` dùng để chống tạo đơn lặp; nội dung chuyển khoản phải khớp `payment.transfer_content` trong response.
 
 `sender` và `recipient` bắt buộc; FE không cần gửi `prisoner_id`. Backend tìm hồ sơ đã xuất bản bằng `recipient.prisoner_code` (số giam) và tên cuối trong `recipient.name`, cùng cách đối chiếu với API đặt lịch thăm gặp. Sau đó backend kiểm tra số điện thoại tài khoản có trong hồ sơ phạm nhân và tự gắn `prisoner_id` nội bộ. Không tìm thấy hoặc trùng nhiều hồ sơ thì trả 422; tài khoản không được phép gửi cho phạm nhân đó thì trả 403. `sender.identity_number` là CMND 9 số hoặc CCCD 12 số; `sender.phone` phải trùng số tài khoản đăng nhập. `recipient.gender` nhận `MALE` hoặc `FEMALE`; `recipient.group` nhận mã tổ `TO_1` đến `TO_7`, `TO_NU` hoặc `UNKNOWN`. Các thông tin này được lưu lại trong `sender_details`, `recipient_details` của đơn để đối chiếu sau này. `subcamp` là tên phân trại nhập từ form vì hồ sơ phạm nhân chưa có trường này.
 

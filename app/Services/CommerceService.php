@@ -85,11 +85,17 @@ class CommerceService
                 $record = DepositRequest::create($attributes + ['amount' => $amount]);
             }
 
+            $paymentCode = $kind === 'order' && isset($data['key'])
+                ? $data['key'] : ($kind === 'order' ? 'DH' : 'LK').strtoupper(Str::random(20));
+            if (isset($data['key']) && Payment::where('code', $paymentCode)->exists()) {
+                throw ValidationException::withMessages(['key' => 'Mã đơn hàng đã được sử dụng.']);
+            }
+
             return Payment::create([
                 'customer_id' => $customer->id,
                 'order_id' => $kind === 'order' ? $record->id : null,
                 'deposit_request_id' => $kind === 'deposit' ? $record->id : null,
-                'code' => ($kind === 'order' ? 'DH' : 'LK').strtoupper(Str::random(20)),
+                'code' => $paymentCode,
                 'amount' => $amount, 'bank' => config('commerce.bank'),
                 'account_number' => config('commerce.account_number'), 'account_name' => config('commerce.account_name'),
                 'expires_at' => now()->addMinutes(max(1, config('commerce.payment_minutes'))),

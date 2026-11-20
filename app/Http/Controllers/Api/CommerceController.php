@@ -42,11 +42,15 @@ class CommerceController extends Controller
     public function createOrder(Request $request, CommerceService $service)
     {
         $data = $request->validate($this->personRules() + [
+            'key' => ['sometimes', 'string', 'regex:/^DH[A-Z0-9]{6,20}$/i'],
             'note' => 'nullable|string|max:1000',
             'items' => 'required|array|min:1|max:100',
             'items.*.product_id' => 'required|integer|min:1|distinct',
             'items.*.quantity' => 'required|integer|min:1|max:100',
         ]);
+        if (isset($data['key'])) {
+            $data['key'] = strtoupper($data['key']);
+        }
         $payment = $service->create($request->user(), 'order', $data, $this->key($request));
 
         return response()->json(['data' => $payment->order->load(self::ORDER_RELATIONS), 'payment' => $service->paymentData($payment)], 201);
