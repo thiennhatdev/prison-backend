@@ -112,11 +112,12 @@ class CommerceController extends Controller
     public function reconcileTransaction(Request $request, int $id, CommerceService $service)
     {
         $data = $request->validate([
-            'order_id' => 'required|integer|min:1',
+            'order_id' => 'required_without:payment_code|prohibits:payment_code|integer|min:1',
+            'payment_code' => ['required_without:order_id', 'prohibits:order_id', 'string', 'regex:/^DH[A-Z0-9]{6,20}$/i'],
             'note' => 'required|string|min:10|max:500',
             'confirmed' => 'accepted',
         ]);
-        $service->reconcileOrder($id, $data['order_id'], $request->user('twill_users')->id, $data['note']);
+        $service->reconcileOrder($id, $data['payment_code'] ?? $data['order_id'], $request->user('twill_users')->id, $data['note']);
 
         return back()->with('success', 'Đã ghép giao dịch với đơn hàng và ghi nhận thanh toán.');
     }

@@ -212,7 +212,7 @@ class CommerceTest extends TestCase
         $admin->id = 7;
         $this->actingAs($admin, 'twill_users');
         $this->post('/admin/commerce/transactions/1/reconcile', [
-            'order_id' => $payment->order_id,
+            'payment_code' => strtolower($payment->code),
             'note' => 'Đã xác minh sao kê và người chuyển tiền.',
             'confirmed' => '1',
         ])->assertRedirect()->assertSessionHasNoErrors();

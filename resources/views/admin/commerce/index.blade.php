@@ -86,7 +86,7 @@ Phạm nhân #{{ $record->prisoner_id }}
 <td><span class="commerce-status commerce-status--{{ strtolower($record->status ?? ($section === "ledger" ? "credited" : ($record->is_active ? "active" : "inactive"))) }}">{{ $statuses[$record->status] ?? ($section === "ledger" ? "Đã ghi có" : ($record->is_active ? ($section === 'categories' ? 'Hiển thị' : 'Đang bán') : ($section === 'categories' ? 'Ẩn' : 'Ngừng bán'))) }}</span>
 @if($section === 'transactions' && $record->status === 'REVIEW' && $record->reason === 'UNKNOWN_PAYMENT')
 <form class="commerce-action commerce-reconcile" method="POST" action="{{ route('admin.commerce.transaction.reconcile', $record->id) }}">@csrf
-<label>Ghép với đơn hàng #<input name="order_id" type="number" min="1" required></label>
+<label>Mã chuyển khoản trên đơn hàng <input name="payment_code" type="text" maxlength="22" required placeholder="DH..."></label>
 <label>Ghi chú đối soát <input name="note" maxlength="500" minlength="10" required placeholder="Đã kiểm tra sao kê và người chuyển"></label>
 <label class="commerce-confirmation"><input name="confirmed" type="checkbox" value="1" required> Đã đối chiếu sao kê và xác nhận đúng đơn</label>
 <button>Ghi nhận thanh toán</button></form>

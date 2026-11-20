@@ -162,15 +162,17 @@ class CommerceService
         }, 3);
     }
 
-    public function reconcileOrder(int $transactionId, int $orderId, int $reviewerId, string $note): void
+    public function reconcileOrder(int $transactionId, int|string $orderReference, int $reviewerId, string $note): void
     {
-        DB::transaction(function () use ($transactionId, $orderId, $reviewerId, $note) {
+        DB::transaction(function () use ($transactionId, $orderReference, $reviewerId, $note) {
             $transaction = BankTransaction::whereKey($transactionId)->lockForUpdate()->firstOrFail();
             abort_unless($transaction->status === 'REVIEW' && $transaction->reason === 'UNKNOWN_PAYMENT'
                 && $transaction->payment_id === null, 409, 'Giao dịch không còn chờ ghép thủ công.');
 
-            $order = Order::whereKey($orderId)->lockForUpdate()->firstOrFail();
-            $payment = Payment::where('order_id', $order->id)->lockForUpdate()->firstOrFail();
+            $payment = Payment::where(is_int($orderReference) ? 'order_id' : 'code',
+                is_int($orderReference) ? $orderReference : strtoupper($orderReference))
+                ->lockForUpdate()->firstOrFail();
+            $order = Order::whereKey($payment->order_id)->lockForUpdate()->firstOrFail();
             abort_unless($order->status === 'AWAITING_PAYMENT' && $payment->status === 'PENDING'
                 && ! BankTransaction::where('payment_id', $payment->id)->exists(), 409, 'Đơn đã có giao dịch hoặc không còn chờ thanh toán.');
 
