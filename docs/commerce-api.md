@@ -22,7 +22,7 @@ Trong SePay:
 - Tạo webhook tiền vào, URL HTTPS công khai: `https://TEN_MIEN/api/webhooks/sepay`.
 - Chọn xác thực **API Key**, nhập cùng khóa `SEPAY_WEBHOOK_KEY`, định dạng JSON.
 - Gửi cả giao dịch không có mã để giữ lịch sử đối soát; không bật bỏ qua giao dịch thiếu mã.
-- Có thể cấu hình hai tiền tố DH và LK để lấy trường `code`. Backend cũng tìm mã DH/LK kèm 20 ký tự trong `content` khi `code` trống hoặc không khớp; nhiều mã thanh toán hợp lệ trong cùng giao dịch được giữ lại để đối soát.
+- Có thể cấu hình hai tiền tố DH và LK để lấy trường `code`. Backend cũng tìm mã DH/LK kèm 6–20 ký tự trong `content` khi `code` trống hoặc không khớp; nhiều mã thanh toán hợp lệ trong cùng giao dịch được giữ lại để đối soát.
 - Bật gửi lại khi HTTP status ngoài 2xx. Thành công trả 201 và `{"success":true}`. Khi lỗi lâu, kiểm tra nhật ký SePay và gửi lại webhook; chưa có tác vụ đồng bộ bù bằng API SePay.
 - Với tài khoản VietinBank cá nhân, nội dung QR bắt đầu bằng `SEVQR` để SePay nhận biến động số dư; API trả `payment.transfer_content` là nội dung cần chuyển khoản. Mã `payment.code` vẫn dùng để ghép đơn.
 - Bản này dùng tài khoản ngân hàng trực tiếp, không dùng tài khoản ảo/subAccount.
@@ -37,6 +37,8 @@ Danh sách/chi tiết đơn, lưu ký, thanh toán chỉ trả bản ghi của t
 Webhook không dùng token thân nhân, dùng `Authorization: Apikey KHOA_BI_MAT`.
 
 ## Endpoint
+
+Nội dung chuyển khoản phải dùng `payment.transfer_content` do API trả về (hoặc mã `payment.code` khi nhập tay). Webhook đối chiếu mã `DH`/`LK` trong `content` với mã thanh toán đã lưu. Để tương thích với các đơn cũ dùng `Idempotency-Key` làm nội dung chuyển khoản, webhook cũng đối chiếu chính xác key đã lưu. Trường `code` do SePay tách có thể chỉ là tiền tố nên không thay thế việc đọc `content`.
 
 | Method | Path | Chức năng |
 |---|---|---|

@@ -109,14 +109,18 @@ class CommerceService
                 return;
             }
             $codes = [];
-            if (preg_match('/^(?:DH|LK)[A-Z0-9]{20}$/i', (string) ($payload['code'] ?? ''))) {
+            if (preg_match('/^(?:DH|LK)[A-Z0-9]{6,20}$/i', (string) ($payload['code'] ?? ''))) {
                 $codes[] = strtoupper($payload['code']);
             }
-            preg_match_all('/\b(?:DH|LK)[A-Z0-9]{20}\b/i', $payload['content'] ?? '', $matches);
+            preg_match_all('/\b(?:DH|LK)[A-Z0-9]{6,20}\b/i', $payload['content'] ?? '', $matches);
             foreach ($matches[0] as $code) {
                 $codes[] = strtoupper($code);
             }
-            $payments = Payment::whereIn('code', array_unique($codes))->lockForUpdate()->get();
+            $codes = array_unique($codes);
+            // Older clients may have used the order's idempotency key as the transfer memo.
+            $payments = Payment::where(function ($query) use ($codes) {
+                $query->whereIn('code', $codes)->orWhereIn('idempotency_key', $codes);
+            })->lockForUpdate()->get();
             $payment = $payments->count() === 1 ? $payments->first() : null;
             $reason = match (true) {
                 $payload['transferType'] !== 'in' => 'NOT_INCOMING',

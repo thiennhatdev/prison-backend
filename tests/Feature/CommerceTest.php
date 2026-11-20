@@ -143,6 +143,36 @@ class CommerceTest extends TestCase
         $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'MATCHED', 'payment_id' => $payment->id]);
     }
 
+    public function test_webhook_matches_short_order_code_in_vietinbank_memo(): void
+    {
+        $this->prisoner();
+        $category = ProductCategory::create(['name' => 'Food']);
+        $product = Product::create(['name' => 'Item', 'price' => 16000, 'category_id' => $category->id]);
+        $payment = app(CommerceService::class)->create($this->customer(), 'order', $this->people() + [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+        ], 'DH261120T9RHXE');
+        $payment->update(['bank' => 'VietinBank', 'account_number' => '101883618963']);
+        $this->assertNotSame('DH261120T9RHXE', $payment->code);
+
+        $this->withHeader('Authorization', 'Apikey secret')->postJson('/api/webhooks/sepay', [
+            'id' => 101005705,
+            'gateway' => 'VietinBank',
+            'transactionDate' => '2026-11-20 09:28:05',
+            'accountNumber' => '101883618963',
+            'subAccount' => null,
+            'code' => 'DH261120',
+            'content' => '164D61120Q9JNNRA SEVQR DH261120T9RHXE',
+            'transferType' => 'in',
+            'transferAmount' => 16000,
+            'referenceCode' => '164D61120Q9JNNRA',
+        ])->assertCreated();
+
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('bank_transactions', [
+            'sepay_id' => '101005705', 'status' => 'MATCHED', 'payment_id' => $payment->id,
+        ]);
+    }
+
     public function test_webhook_does_not_choose_between_two_known_payment_codes(): void
     {
         $this->prisoner();
