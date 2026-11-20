@@ -139,7 +139,7 @@ class CommerceTest extends TestCase
 
         app(CommerceService::class)->receive($payload);
 
-        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAYMENT_RECEIVED']);
         $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '1', 'status' => 'MATCHED', 'payment_id' => $payment->id]);
     }
 
@@ -167,7 +167,7 @@ class CommerceTest extends TestCase
             'referenceCode' => '164D61120Q9JNNRA',
         ])->assertCreated();
 
-        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAYMENT_RECEIVED']);
         $this->assertDatabaseHas('bank_transactions', [
             'sepay_id' => '101005705', 'status' => 'MATCHED', 'payment_id' => $payment->id,
         ]);
@@ -216,7 +216,7 @@ class CommerceTest extends TestCase
             'note' => 'Đã xác minh sao kê và người chuyển tiền.',
             'confirmed' => '1',
         ])->assertRedirect()->assertSessionHasNoErrors();
-        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAYMENT_RECEIVED']);
         $this->assertDatabaseHas('bank_transactions', [
             'sepay_id' => '1', 'status' => 'MATCHED', 'reason' => 'MANUALLY_MATCHED',
             'payment_id' => $payment->id, 'reconciled_by' => 7,
@@ -290,10 +290,35 @@ class CommerceTest extends TestCase
         $this->postJson('/api/orders', $data)->assertConflict();
         $payment = Payment::findOrFail($response->json('payment.id'));
         app(CommerceService::class)->receive($this->payload($payment));
-        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAID']);
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAYMENT_RECEIVED']);
         $this->getJson('/api/orders/'.$payment->order_id)->assertOk()
-            ->assertJsonPath('data.status', 'PAID')->assertJsonPath('data.payment.status', 'PAID');
+            ->assertJsonPath('data.status', 'PAYMENT_RECEIVED')->assertJsonPath('data.payment.status', 'PAID');
         $this->assertDatabaseCount('prisoner_ledger_entries', 0);
+    }
+
+    public function test_officer_confirms_delivery_only_after_payment_is_received(): void
+    {
+        $customer = $this->customer();
+        $this->prisoner();
+        $category = ProductCategory::create(['name' => 'Food']);
+        $product = Product::create(['name' => 'Item', 'price' => 20000, 'category_id' => $category->id]);
+        $payment = app(CommerceService::class)->create($customer, 'order', $this->people() + [
+            'items' => [['product_id' => $product->id, 'quantity' => 1]],
+        ], 'delivery-test');
+
+        $admin = new AdminUser(['role' => 'NEW', 'published' => true]);
+        $admin->id = 7;
+        $this->actingAs($admin, 'twill_users');
+        $url = '/admin/commerce/orders/'.$payment->order_id;
+        $this->post($url, ['status' => 'DELIVERED'])->assertRedirect()->assertSessionHasErrors('status');
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'AWAITING_PAYMENT']);
+
+        app(CommerceService::class)->receive($this->payload($payment));
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'PAYMENT_RECEIVED']);
+        $this->post($url, ['status' => 'DELIVERED'])->assertRedirect()->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('orders', ['id' => $payment->order_id, 'status' => 'DELIVERED']);
+        $this->post($url, ['status' => 'DELIVERED'])->assertRedirect()->assertSessionHasErrors('status');
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'PAID']);
     }
 
     public function test_order_key_is_the_payment_code_used_by_vietinbank_webhook(): void
@@ -323,7 +348,7 @@ class CommerceTest extends TestCase
             'transferAmount' => 5000,
         ])->assertCreated();
 
-        $this->assertDatabaseHas('orders', ['id' => $response->json('data.id'), 'status' => 'PAID']);
+        $this->assertDatabaseHas('orders', ['id' => $response->json('data.id'), 'status' => 'PAYMENT_RECEIVED']);
         $this->assertDatabaseHas('bank_transactions', ['sepay_id' => '101112949', 'status' => 'MATCHED']);
 
         $this->withHeader('Idempotency-Key', 'different-order-same-code')

@@ -155,7 +155,7 @@ class CommerceService
             }
             $payment->update(['status' => 'PAID', 'paid_at' => now()]);
             if ($payment->order_id) {
-                $payment->order()->update(['status' => 'PAID']);
+                $payment->order()->update(['status' => 'PAYMENT_RECEIVED']);
             } else {
                 $deposit = $payment->depositRequest()->lockForUpdate()->firstOrFail();
                 PrisonerLedgerEntry::create([
@@ -190,7 +190,7 @@ class CommerceService
                 409, 'Tài khoản nhận hoặc số tiền không khớp đơn hàng.');
 
             $payment->update(['status' => 'PAID', 'paid_at' => now()]);
-            $order->update(['status' => 'PAID']);
+            $order->update(['status' => 'PAYMENT_RECEIVED']);
             $transaction->update([
                 'payment_id' => $payment->id, 'status' => 'MATCHED', 'reason' => 'MANUALLY_MATCHED',
                 'reconciled_by' => $reviewerId, 'reconciled_at' => now(), 'reconciliation_note' => $note,

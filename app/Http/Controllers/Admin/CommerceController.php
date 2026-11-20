@@ -101,8 +101,12 @@ class CommerceController extends Controller
         $data = $request->validate(['status' => 'required|in:PREPARING,DELIVERED']);
         DB::transaction(function () use ($id, $data) {
             $order = Order::whereKey($id)->lockForUpdate()->firstOrFail();
-            $expected = $data['status'] === 'PREPARING' ? 'PAID' : 'PREPARING';
-            abort_unless($order->status === $expected && $order->payment?->status === 'PAID', 409, 'Đơn chưa thanh toán hoặc trạng thái không hợp lệ.');
+            $allowedFrom = $data['status'] === 'PREPARING'
+                ? ['PAYMENT_RECEIVED', 'PAID']
+                : ['PAYMENT_RECEIVED', 'PAID', 'PREPARING'];
+            if (! in_array($order->status, $allowedFrom, true) || $order->payment?->status !== 'PAID') {
+                throw ValidationException::withMessages(['status' => 'Đơn chưa nhận tiền hoặc trạng thái không hợp lệ.']);
+            }
             $order->update($data);
         });
 

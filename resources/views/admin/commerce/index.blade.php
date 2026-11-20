@@ -1,11 +1,11 @@
 @extends('twill::layouts.free')
 @push('extra_css')
-<link rel="stylesheet" href="{{ asset('css/commerce.css') }}?v=2">
+<link rel="stylesheet" href="{{ asset('css/commerce.css') }}?v=3">
 @endpush
 @section('customPageContent')
 @php
     $sections = ['orders'=>'Đơn hàng','deposits'=>'Tiền lưu ký','transactions'=>'Giao dịch ngân hàng','ledger'=>'Sổ lưu ký','categories'=>'Danh mục mặt hàng','products'=>'Mặt hàng'];
-    $statuses = ['AWAITING_PAYMENT'=>'Chờ thanh toán','PENDING'=>'Chờ thanh toán','PAID'=>'Đã thanh toán','PREPARING'=>'Đang chuẩn bị','DELIVERED'=>'Đã giao','CREDITED'=>'Đã ghi có','MATCHED'=>'Đã đối soát','REVIEW'=>'Cần đối soát'];
+    $statuses = ['AWAITING_PAYMENT'=>'Chờ thanh toán','PENDING'=>'Chờ thanh toán','PAID'=>'Đã nhận tiền','PAYMENT_RECEIVED'=>'Đã nhận tiền','PREPARING'=>'Đang chuẩn bị','DELIVERED'=>'Đã giao hàng','CREDITED'=>'Đã ghi có','MATCHED'=>'Đã đối soát','REVIEW'=>'Cần đối soát'];
 @endphp
 <div class="commerce-page">
 <span class="commerce-eyebrow">QUẢN LÝ GIAO DỊCH</span>
@@ -37,7 +37,7 @@
 <input type="hidden" name="is_active" value="1"><button type="submit">Thêm</button>
 </form></div>
 @elseif(in_array($section, ['orders','deposits','transactions']))
-<div class="commerce-panel"><form class="commerce-form" method="GET"><input type="hidden" name="section" value="{{ $section }}"><label>Trạng thái<select name="status"><option value="">Tất cả trạng thái</option>@foreach(($section === "orders" ? ["AWAITING_PAYMENT", "PAID", "PREPARING", "DELIVERED"] : ($section === "deposits" ? ["AWAITING_PAYMENT", "CREDITED"] : ["MATCHED", "REVIEW"])) as $status)<option value="{{ $status }}" @selected(request("status") === $status)>{{ $statuses[$status] }}</option>@endforeach</select></label><button type="submit">Lọc kết quả</button><a class="commerce-reset" href="{{ route('admin.commerce.index',['section'=>$section]) }}">Xóa lọc</a></form></div>
+<div class="commerce-panel"><form class="commerce-form" method="GET"><input type="hidden" name="section" value="{{ $section }}"><label>Trạng thái<select name="status"><option value="">Tất cả trạng thái</option>@foreach(($section === "orders" ? ["AWAITING_PAYMENT", "PAYMENT_RECEIVED", "PREPARING", "DELIVERED"] : ($section === "deposits" ? ["AWAITING_PAYMENT", "CREDITED"] : ["MATCHED", "REVIEW"])) as $status)<option value="{{ $status }}" @selected(request("status") === $status)>{{ $statuses[$status] }}</option>@endforeach</select></label><button type="submit">Lọc kết quả</button><a class="commerce-reset" href="{{ route('admin.commerce.index',['section'=>$section]) }}">Xóa lọc</a></form></div>
 @endif
 <div class="commerce-summary"><h2>{{ $sections[$section] }}</h2><span class="commerce-count">{{ number_format($records->total(), 0, ",", ".") }} bản ghi</span></div>
 <div class="commerce-table"><table>
@@ -91,10 +91,15 @@ Phạm nhân #{{ $record->prisoner_id }}
 <label class="commerce-confirmation"><input name="confirmed" type="checkbox" value="1" required> Đã đối chiếu sao kê và xác nhận đúng đơn</label>
 <button>Ghi nhận thanh toán</button></form>
 @endif
-@if($section === 'orders' && in_array($record->status, ['PAID','PREPARING']))
+@if($section === 'orders' && in_array($record->status, ['PAYMENT_RECEIVED','PAID','PREPARING']))
+@if(in_array($record->status, ['PAYMENT_RECEIVED','PAID']))
 <form class="commerce-action" method="POST" action="{{ route('admin.commerce.order', $record->id) }}">@csrf
-<input type="hidden" name="status" value="{{ $record->status === 'PAID' ? 'PREPARING' : 'DELIVERED' }}">
-<button>{{ $record->status === 'PAID' ? 'Chuẩn bị hàng' : 'Xác nhận đã giao' }}</button></form>
+<input type="hidden" name="status" value="PREPARING">
+<button>Chuẩn bị hàng</button></form>
+@endif
+<form class="commerce-action" method="POST" action="{{ route('admin.commerce.order', $record->id) }}">@csrf
+<input type="hidden" name="status" value="DELIVERED">
+<button>Xác nhận đã giao hàng</button></form>
 @endif
 </td></tr>
 @empty<tr><td class="commerce-empty" colspan="5">Chưa có dữ liệu trong mục này.</td></tr>@endforelse

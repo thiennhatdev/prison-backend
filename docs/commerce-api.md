@@ -120,7 +120,7 @@ Chỉ trạng thái từ backend xác nhận thanh toán.
 ## Trạng thái và ghi sổ
 
 - Thanh toán: `PENDING`, `PAID`, `REVIEW`. Hết hạn được tính từ `expires_at`, hiển thị qua `is_expired`; không có job tự đổi trạng thái.
-- Đơn hàng: `AWAITING_PAYMENT` → `PAID` → `PREPARING` → `DELIVERED`.
+- Đơn hàng: `AWAITING_PAYMENT` → `PAYMENT_RECEIVED` (Đã nhận tiền khi webhook SePay khớp hoặc cán bộ đối soát thủ công) → `DELIVERED` (Đã giao hàng sau khi cán bộ xác nhận). Cán bộ có thể chọn bước `PREPARING` (Đang chuẩn bị) trước khi xác nhận giao hàng. Bản ghi thanh toán vẫn dùng `PAID`.
 - Lưu ký: `AWAITING_PAYMENT` → `CREDITED` sau khi nhận đúng tiền. Không cần cán bộ duyệt.
 - Giao dịch: `MATCHED` hoặc `REVIEW`; `RECEIVED` chỉ tồn tại bên trong transaction xử lý.
 

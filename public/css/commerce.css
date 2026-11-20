@@ -34,7 +34,7 @@
 .commerce-detail p{margin:8px 0}
 .commerce-amount{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;color:#0f172a}
 .commerce-status{display:inline-block;padding:4px 10px;border-radius:6px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:700;white-space:nowrap}
-.commerce-status--paid,.commerce-status--credited,.commerce-status--matched,.commerce-status--delivered,.commerce-status--active{background:#ecfdf5;color:#047857}
+.commerce-status--paid,.commerce-status--payment_received,.commerce-status--credited,.commerce-status--matched,.commerce-status--delivered,.commerce-status--active{background:#ecfdf5;color:#047857}
 .commerce-status--review,.commerce-status--awaiting_payment,.commerce-status--pending{background:#fffbeb;color:#b45309}
 .commerce-status--inactive{background:#f1f5f9;color:#64748b}
 .commerce-action{margin-top:12px}
